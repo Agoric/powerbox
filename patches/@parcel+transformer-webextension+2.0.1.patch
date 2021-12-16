@@ -1,0 +1,80 @@
+diff --git a/node_modules/@parcel/transformer-webextension/lib/WebExtensionTransformer.js b/node_modules/@parcel/transformer-webextension/lib/WebExtensionTransformer.js
+index fbc18aa..7b5e611 100644
+--- a/node_modules/@parcel/transformer-webextension/lib/WebExtensionTransformer.js
++++ b/node_modules/@parcel/transformer-webextension/lib/WebExtensionTransformer.js
+@@ -73,7 +73,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
+ 
+ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+ 
+-const DEP_LOCS = [['icons'], ['browser_action', 'default_icon'], ['browser_action', 'default_popup'], ['page_action', 'default_icon'], ['page_action', 'default_popup'], ['background', 'scripts'], ['chrome_url_overrides'], ['devtools_page'], ['options_ui', 'page'], ['sidebar_action', 'default_icon'], ['sidebar_action', 'default_panel'], ['storage', 'managed_schema'], ['theme', 'images', 'theme_frame'], ['theme', 'images', 'additional_backgrounds'], ['user_scripts', 'api_script']];
++const DEP_LOCS = [['icons'], ['browser_action', 'default_icon'], ['browser_action', 'default_popup'], ['page_action', 'default_icon'], ['page_action', 'default_popup'], ['background', 'scripts'], ['background', 'service_worker'], ['chrome_url_overrides'], ['devtools_page'], ['options_ui', 'page'], ['sidebar_action', 'default_icon'], ['sidebar_action', 'default_panel'], ['storage', 'managed_schema'], ['theme', 'images', 'theme_frame'], ['theme', 'images', 'additional_backgrounds'], ['user_scripts', 'api_script']];
+ 
+ async function collectDependencies(asset, program, ptrs, hot) {
+   var _program$browser_acti;
+@@ -250,6 +250,10 @@ async function collectDependencies(asset, program, ptrs, hot) {
+       program.background.scripts = [];
+     }
+ 
++    if (program.background.service_worker) {
++      program.background.scripts.push(program.background.service_worker);
++    }
++
+     program.background.scripts.push(asset.addURLDependency('./runtime/autoreload-bg.js', {
+       resolveFrom: __filename
+     }));
+diff --git a/node_modules/@parcel/transformer-webextension/lib/schema.js b/node_modules/@parcel/transformer-webextension/lib/schema.js
+index 56b3c0e..9ffcb9d 100644
+--- a/node_modules/@parcel/transformer-webextension/lib/schema.js
++++ b/node_modules/@parcel/transformer-webextension/lib/schema.js
+@@ -50,7 +50,7 @@ var _default = {
+   properties: {
+     manifest_version: {
+       type: 'number',
+-      enum: [2]
++      enum: [2, 3]
+     },
+     name: {
+       type: 'string'
+@@ -117,6 +117,9 @@ var _default = {
+         },
+         persistent: {
+           type: 'boolean'
++        },
++        service_worker: {
++          type: 'string'
+         }
+       }
+     },
+diff --git a/node_modules/@parcel/transformer-webextension/src/WebExtensionTransformer.js b/node_modules/@parcel/transformer-webextension/src/WebExtensionTransformer.js
+index c409b21..b43f2ff 100644
+--- a/node_modules/@parcel/transformer-webextension/src/WebExtensionTransformer.js
++++ b/node_modules/@parcel/transformer-webextension/src/WebExtensionTransformer.js
+@@ -20,6 +20,7 @@ const DEP_LOCS = [
+   ['page_action', 'default_icon'],
+   ['page_action', 'default_popup'],
+   ['background', 'scripts'],
++  ['background', 'service_worker'],
+   ['chrome_url_overrides'],
+   ['devtools_page'],
+   ['options_ui', 'page'],
+diff --git a/node_modules/@parcel/transformer-webextension/src/schema.js b/node_modules/@parcel/transformer-webextension/src/schema.js
+index 4d829ba..2c22969 100644
+--- a/node_modules/@parcel/transformer-webextension/src/schema.js
++++ b/node_modules/@parcel/transformer-webextension/src/schema.js
+@@ -43,7 +43,7 @@ export default ({
+   properties: {
+     manifest_version: {
+       type: 'number',
+-      enum: [2],
++      enum: [2, 3],
+     },
+     name: {type: 'string'},
+     version: {
+@@ -92,6 +92,7 @@ export default ({
+       properties: {
+         scripts: arrStr,
+         page: {type: 'string'},
++        service_worker: {type: 'string'},
+         persistent: {type: 'boolean'},
+       },
+     },
