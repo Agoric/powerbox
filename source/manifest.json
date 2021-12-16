@@ -1,13 +1,13 @@
 {
-	"name": "Awesome Extension",
-	"version": "0.0.0",
-	"description": "An awesome new browser extension",
-	"homepage_url": "https://github.com/awesome-templates/browser-extension-template",
+	"name": "Agoric Power Box",
+	"version": "0.0.1",
+	"description": "Your browser's gateway to the Agoric platform",
+	"homepage_url": "https://github.com/Agoric/powerbox",
 	"manifest_version": 2,
 	"minimum_chrome_version": "74",
 	"applications": {
 		"gecko": {
-			"id": "awesome-extension@notlmn.github.io",
+			"id": "powerbox@agoric.com",
 			"strict_min_version": "67.0"
 		}
 	},
