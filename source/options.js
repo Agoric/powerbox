@@ -1,5 +1,6 @@
 /* global document */
 import optionsStorage from './options-storage.js';
+import debounce from './debounce.js';
 
 const awu = document.querySelector('#agoric-wallet-urls');
 const newUrl = document.querySelector('#new-wallet-url');
@@ -53,17 +54,20 @@ async function init() {
 		awu.append(makeListItem(url, url === defaultUrl));
 	}
 
+  const save = () => optionsStorage.set({ walletUrls, defaultUrl });
+
 	newUrl.querySelector('input').addEventListener('keydown', async e => {
 		if (e.key === 'Enter' || e.keyCode === 13) {
 			e.preventDefault();
 			const li = makeListItem(e.target.value, false);
 			awu.insertBefore(li, newUrl.nextSibling);
+
+      walletUrls = [e.target.value, ...walletUrls];
 			e.target.value = '';
 
-			walletUrls = [e.target.value, ...walletUrls];
-			await optionsStorage.set({ walletUrls, defaultUrl });
-		}
-	});
+			debounce(save, 1000);
+    }
+  });
 }
 
 init();

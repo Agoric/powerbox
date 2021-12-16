@@ -10,6 +10,9 @@
   color: #000;
   margin-left: 10px;
 }
+.hidden {
+  display: none;
+}
 </style>
 
 <p>This is a test of petnames:
@@ -19,7 +22,36 @@
 
 <p>And my wallet is found at: <a id="wlt">Loading...</a></p>
 
-<script type="text/javascript">
+<p>This page is <span class="aWallet hidden">a wallet (petname editor enabled)</span>
+  <span class="notAWallet">not a wallet (petname editor disabled)</span></p>
+
+<table class="aWallet hidden">
+  <tr id="ag1"><th>AG.1</th>
+  <td><input class="petname" type="text" placeholder="Petname" /></td>
+  <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
+  <tr id="ag2"><th>AG.2</th>
+  <td><input class="petname" type="text" placeholder="Petname" /></td>
+  <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
+  </tr>
+</table>
+
+<script type="module">
+// The following doesn't work for file: URLs.
+/// import debounce from './source/debounce.js';
+// So we inline it.
+const debounceMap = new Map();
+
+const debounce = (fn, delay) => {
+  const timeout = debounceMap.get(fn);
+  if (timeout) {
+    clearTimeout(timeout);
+  }
+  debounceMap.set(fn, setTimeout(() => {
+    debounceMap.delete(fn);
+    fn();
+  }, delay));
+};
+
 window.addEventListener('message', ev => {
   const obj = ev.data;
   switch (obj.type) {
@@ -33,6 +65,38 @@ window.addEventListener('message', ev => {
       wlt.href = ev.data.url;
       break;
     }
+    case 'AGORIC_POWERBOX_PETDATA': {
+      const { petdata } = obj;
+      for (const id of [1, 2]) {
+        const petname = document.querySelector(`#ag${id} .petname`);
+        const petimage = document.querySelector(`#ag${id} .petimage`);
+        const { petname: name, petimage: image } = petdata[`AG.${id}`] || {};
+        petname.value = name || '';
+        petimage.value = image || '';
+      }
+      break;
+    }
+    case 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED': {
+      const { isPrivileged } = obj;
+      if (isPrivileged) {
+        document.querySelectorAll('.aWallet').forEach(e => e.classList.remove('hidden'));
+        document.querySelectorAll('.notAWallet').forEach(e => e.classList.add('hidden'));
+      } else {
+        document.querySelectorAll('.aWallet').forEach(e => e.classList.add('hidden'));
+        document.querySelectorAll('.notAWallet').forEach(e => e.classList.remove('hidden'));
+      }
+      break;
+    }
   }
 });
+
+for (const id of ['1', '2']) {
+  const petname = document.querySelector(`#ag${id} .petname`);
+  const petimage = document.querySelector(`#ag${id} .petimage`)
+  const save = () => {
+    window.postMessage({ type: 'AGORIC_POWERBOX_SET_PETDATA', id: `AG.${id}`, petdata: { petname: petname.value, petimage: petimage.value }}, '*');
+  };
+  petname.addEventListener('keyup', ev => debounce(save, 1000));
+  petimage.addEventListener('keyup', ev => debounce(save, 1000));
+}
 </script>
