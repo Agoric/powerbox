@@ -1,0 +1,38 @@
+<style>
+[data-agoric-target="img"] {
+  display: inline-block;
+  width: 32px;
+  height: 32px
+}
+[data-agoric-target="text"] {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+  margin-left: 10px;
+}
+</style>
+
+<p>This is a test of petnames:
+  <div data-agoric-target="img" data-agoric-type="purse" data-agoric-id="AG.2">AG.2</div>
+  <span data-agoric-target="text" data-agoric-type="purse" data-agoric-id="AG.1">AG.1</span>
+</p>
+
+<p>And my wallet is found at: <a id="wlt">Loading...</a></p>
+
+<script type="text/javascript">
+window.addEventListener('message', ev => {
+  const obj = ev.data;
+  switch (obj.type) {
+    case 'AGORIC_POWERBOX_READY': {
+      window.postMessage({ type: 'AGORIC_POWERBOX_GET_URL' }, '*');
+      break;
+    }
+    case 'AGORIC_POWERBOX_URL': {
+      const wlt = document.getElementById('wlt');
+      wlt.innerText = ev.data.url;
+      wlt.href = ev.data.url;
+      break;
+    }
+  }
+});
+</script>

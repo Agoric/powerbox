@@ -1,4 +1,20 @@
-# browser-extension-template
+# Agoric notes
+
+To try this out:
+
+```
+npm install
+npm run watch
+npm i -g web-ext # in another terminal
+web-ext run -t chromium # to auto-reload Chrome
+web-ext run # to auto-reload Firefox
+```
+
+Then browse to the `test.html` in the current directory.
+
+Then navigate 
+
+# UPSTREAM: browser-extension-template
 
 [link-webext-polyfill]: https://github.com/mozilla/webextension-polyfill
 [link-rgh]: https://github.com/sindresorhus/refined-github
