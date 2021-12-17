@@ -63,7 +63,8 @@
   },
   "prettier": {
     "trailingComma": "all",
-    "singleQuote": true
+    "singleQuote": true,
+    "useTabs": false
   },
   "publishConfig": {
     "access": "public"

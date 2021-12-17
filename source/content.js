@@ -1,9 +1,12 @@
+/* global window, document */
 import browser from 'webextension-polyfill';
 
 import optionsStorage from './options-storage.js';
 
-const DEFAULT_PET_IMAGE = 'https://agoric.com/wp-content/themes/agoric_2021_theme/assets/android-icon-192x192.png';
-const UNKNOWN_PET_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/d/d9/Icon-round-Question_mark.svg';
+const DEFAULT_PET_IMAGE =
+  'https://agoric.com/wp-content/themes/agoric_2021_theme/assets/android-icon-192x192.png';
+const UNKNOWN_PET_IMAGE =
+  'https://upload.wikimedia.org/wikipedia/commons/d/d9/Icon-round-Question_mark.svg';
 
 const accessCheck = (walletUrls, myOrigin) => {
   for (const url of walletUrls) {
@@ -17,16 +20,15 @@ const accessCheck = (walletUrls, myOrigin) => {
     }
   }
   return false;
-}
+};
 
 /** @type {WeakMap<HTMLElement, { shadow: ShadowRoot, hidden?: HTMLElement }>} */
 const elementToData = new WeakMap();
 
 window.addEventListener('message', async ev => {
   const obj = ev.data;
-  const send = obj => window.postMessage(obj);
+  const send = o => window.postMessage(o);
   switch (obj.type) {
-    case 'AGORIC_POWERBOX_READY':
     case 'AGORIC_POWERBOX_EXPAND_PETNAMES': {
       const { petdata = {} } = await optionsStorage.getAll();
       const { selector = '[data-agoric-id]' } = obj;
@@ -35,7 +37,9 @@ window.addEventListener('message', async ev => {
       [...els].forEach(el => {
         try {
           if (!elementToData.has(el)) {
-            elementToData.set(el, { shadow: el.attachShadow({ mode: 'closed' }) });
+            elementToData.set(el, {
+              shadow: el.attachShadow({ mode: 'closed' }),
+            });
           }
           const { shadow, hidden } = elementToData.get(el);
 
@@ -48,14 +52,18 @@ window.addEventListener('message', async ev => {
             petimage = UNKNOWN_PET_IMAGE;
           }
           if (!petname) {
-            petname = `Unknown.${agoricId}`
+            petname = `Unknown.${agoricId}`;
           }
 
           let n = hidden;
           switch (agoricTarget) {
             case 'img': {
               if (petimage) {
-                if (!hidden || !hidden.tagName || hidden.tagName.toLowerCase() !== 'img') {
+                if (
+                  !hidden ||
+                  !hidden.tagName ||
+                  hidden.tagName.toLowerCase() !== 'img'
+                ) {
                   // Our existing tag is not an img.
                   n = document.createElement('img');
                 } else if (petimage !== hidden.src || petname !== hidden.alt) {
@@ -105,32 +113,39 @@ window.addEventListener('message', async ev => {
       break;
     }
     case 'AGORIC_POWERBOX_SET_PETDATA': {
-      const { petdata = {}, walletUrls = []} = await optionsStorage.getAll();
+      const { petdata = {}, walletUrls = [] } = await optionsStorage.getAll();
       const myOrigin = new URL(window.location.href).origin;
       if (accessCheck(walletUrls, myOrigin)) {
         const { id, petdata: pet } = obj;
         petdata[id] = pet;
-        await optionsStorage.set({ petdata: { ...petdata }});
+        await optionsStorage.set({ petdata: { ...petdata } });
       }
       break;
     }
+    default:
   }
 });
 
 let lastIsPrivileged = null;
 const updatePetData = async () => {
-  const { petdata = {}, walletUrls = []} = await optionsStorage.getAll();
+  const { petdata = {}, walletUrls = [] } = await optionsStorage.getAll();
   if (accessCheck(walletUrls, new URL(window.location.href).origin)) {
     if (!lastIsPrivileged) {
       lastIsPrivileged = true;
-      window.postMessage({ type: 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED', isPrivileged: true });
+      window.postMessage({
+        type: 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED',
+        isPrivileged: true,
+      });
     }
     window.postMessage({ type: 'AGORIC_POWERBOX_PETDATA', petdata });
   } else if (lastIsPrivileged === null || lastIsPrivileged) {
     lastIsPrivileged = false;
-    window.postMessage({ type: 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED', isPrivileged: false });
+    window.postMessage({
+      type: 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED',
+      isPrivileged: false,
+    });
   }
-}
+};
 
 // Initialize the petnames.
 window.postMessage({ type: 'AGORIC_POWERBOX_READY' });
