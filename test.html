@@ -4,7 +4,7 @@
   width: 32px;
   height: 32px
 }
-[data-agoric-target="text"] {
+[data-agoric-id] {
   font-size: 18px;
   font-weight: bold;
   color: #000;
@@ -16,8 +16,18 @@
 </style>
 
 <p>This is a test of petnames:
-  <div data-agoric-target="img" data-agoric-type="purse" data-agoric-id="AG.2">AG.2</div>
-  <span data-agoric-target="text" data-agoric-type="purse" data-agoric-id="AG.1">AG.1</span>
+  <div data-agoric-target="img" data-agoric-id="AG.1">AG.1</div>
+  <span data-agoric-id="AG.1">AG.1</span>
+</p>
+
+<p>Another one:
+  <div data-agoric-target="img" data-agoric-id="AG.2">AG.2</div>
+  <span data-agoric-id="AG.2">AG.2</span>
+</p>
+
+<p>Unknown petname:
+  <div data-agoric-id="AG.n" data-agoric-target="img">AG.n</div>
+  <span data-agoric-id="AG.n">AG.n</span>
 </p>
 
 <p>And my wallet is found at: <a id="wlt">Loading...</a></p>

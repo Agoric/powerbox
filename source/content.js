@@ -2,8 +2,8 @@ import browser from 'webextension-polyfill';
 
 import optionsStorage from './options-storage.js';
 
-const DEFAULT_ICON = 'https://agoric.com/wp-content/themes/agoric_2021_theme/assets/android-icon-192x192.png';
-
+const DEFAULT_PET_IMAGE = 'https://agoric.com/wp-content/themes/agoric_2021_theme/assets/android-icon-192x192.png';
+const UNKNOWN_PET_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/2/25/Icon-round-Question_mark.jpg';
 
 const accessCheck = (walletUrls, myOrigin) => {
   for (const url of walletUrls) {
@@ -39,9 +39,17 @@ window.addEventListener('message', async ev => {
           }
           const { shadow, hidden } = elementToData.get(el);
 
-          const { agoricTarget, agoricType = 'unknown', agoricId = '???' } = el.dataset;
-          const properAgoricType = agoricType[0].toUpperCase() + agoricType.slice(1);
-          const { petname = `${properAgoricType}.${agoricId}`, petimage = DEFAULT_ICON } = petdata[agoricId] || {};
+          const { agoricTarget = 'text', agoricId = '???' } = el.dataset;
+          let { petname, petimage } = petdata[agoricId] || {};
+          if (!petimage && petname) {
+            petimage = DEFAULT_PET_IMAGE;
+          }
+          if (!petimage) {
+            petimage = UNKNOWN_PET_IMAGE;
+          }
+          if (!petname) {
+            petname = `Unknown.${agoricId}`
+          }
 
           let n = hidden;
           switch (agoricTarget) {
@@ -58,7 +66,9 @@ window.addEventListener('message', async ev => {
                   return;
                 }
                 n.src = petimage;
-                n.alt = petname;
+                if (petname) {
+                  n.alt = petname;
+                }
                 n.style.width = '100%';
                 n.style.height = '100%';
                 n.style.objectFit = 'contain';
@@ -66,7 +76,7 @@ window.addEventListener('message', async ev => {
               }
               // Fall through to text mode.
             }
-            case 'text': {
+            default: {
               if (!hidden) {
                 n = petname;
               } else if (petname !== hidden) {
@@ -76,10 +86,6 @@ window.addEventListener('message', async ev => {
                 return;
               }
               break;
-            }
-            default: {
-              // do nothing
-              return;
             }
           }
           if (n !== hidden) {
