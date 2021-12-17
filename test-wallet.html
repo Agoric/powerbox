@@ -15,42 +15,30 @@
 }
 </style>
 
-<p>This is a test of petnames:
-  <div data-agoric-target="img" data-agoric-id="AG.1">AG.1</div>
-  <span data-agoric-id="AG.1">AG.1</span>
-</p>
-
-<p>Another one:
-  <div data-agoric-target="img" data-agoric-id="AG.2">AG.2</div>
-  <span data-agoric-id="AG.2">AG.2</span>
-</p>
-
-<p>Unknown petname:
-  <div data-agoric-id="AG.n" data-agoric-target="img">AG.n</div>
-  <span data-agoric-id="AG.n">AG.n</span>
-</p>
-
-<p>And my wallet is found at: <a id="wlt">Loading...</a></p>
-
-<p>This page is <span class="aWallet hidden">a wallet (petname editor enabled)</span>
-  <span class="notAWallet">not a wallet (petname editor disabled)</span>.</p>
-
-<table class="aWallet hidden">
-  <tr id="ag1"><th>AG.1</th>
-  <td><input class="petname" type="text" placeholder="Petname" /></td>
-  <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
-  <tr id="ag2"><th>AG.2</th>
-  <td><input class="petname" type="text" placeholder="Petname" /></td>
-  <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
-  </tr>
-</table>
-
 <p><span class="aWallet hidden">To unmark this page as not a wallet, remove</span>
   <span class="notAWallet">To mark this page as a wallet, add</span>
   <code style="font-weight:bold" class="pageHref">???</code>
 in your Agoric Power Box Extension settings.</p>
 
-<script type="module">
+<table class="aWallet hidden">
+  <tr id="ag1"><th>AG.1</th>
+  <td>
+    <div data-agoric-target="img" data-agoric-id="AG.1">AG.1</div>
+    <span data-agoric-id="AG.1">AG.1</span>
+  </td>
+  <td><input class="petname" type="text" placeholder="Petname" /></td>
+  <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
+  <tr id="ag2"><th>AG.2</th>
+  <td>
+    <div data-agoric-target="img" data-agoric-id="AG.2">AG.2</div>
+    <span data-agoric-id="AG.2">AG.2</span>
+  </td>
+  <td><input class="petname" type="text" placeholder="Petname" /></td>
+  <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
+  </tr>
+</table>
+
+<script type="text/javascript">
 // The following doesn't work for file:// URLs.
 //   import debounce from './source/debounce.js';
 // So we inline it.
@@ -74,13 +62,6 @@ window.addEventListener('message', ev => {
   switch (obj.type) {
     case 'AGORIC_POWERBOX_READY': {
       window.postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETNAMES' }, '*');
-      window.postMessage({ type: 'AGORIC_POWERBOX_GET_URL' }, '*');
-      break;
-    }
-    case 'AGORIC_POWERBOX_URL': {
-      const wlt = document.getElementById('wlt');
-      wlt.innerText = ev.data.url;
-      wlt.href = ev.data.url;
       break;
     }
     case 'AGORIC_POWERBOX_PETDATA': {

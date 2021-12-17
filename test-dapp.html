@@ -1,0 +1,52 @@
+<style>
+[data-agoric-target="img"] {
+  display: inline-block;
+  width: 32px;
+  height: 32px
+}
+[data-agoric-id] {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+  margin-left: 10px;
+}
+.hidden {
+  display: none;
+}
+</style>
+
+<p>This is a test of petnames:
+  <div data-agoric-target="img" data-agoric-id="AG.1">AG.1</div>
+  <span data-agoric-id="AG.1">AG.1</span>
+</p>
+
+<p>Another one:
+  <div data-agoric-target="img" data-agoric-id="AG.2">AG.2</div>
+  <span data-agoric-id="AG.2">AG.2</span>
+</p>
+
+<p>Unknown petname:
+  <div data-agoric-id="AG.n" data-agoric-target="img">AG.n</div>
+  <span data-agoric-id="AG.n">AG.n</span>
+</p>
+
+<p>And my wallet is found at: <a id="wlt">Loading...</a></p>
+
+<script type="text/javascript">
+window.addEventListener('message', ev => {
+  const obj = ev.data;
+  switch (obj.type) {
+    case 'AGORIC_POWERBOX_READY': {
+      window.postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETNAMES' }, '*');
+      window.postMessage({ type: 'AGORIC_POWERBOX_GET_URL' }, '*');
+      break;
+    }
+    case 'AGORIC_POWERBOX_URL': {
+      const wlt = document.getElementById('wlt');
+      wlt.innerText = ev.data.url;
+      wlt.href = ev.data.url;
+      break;
+    }
+  }
+});
+</script>

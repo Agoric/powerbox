@@ -3,16 +3,14 @@
 To try this out:
 
 ```
+npm i -g web-ext # one time initialization
 npm install
-npm run watch
-npm i -g web-ext # in another terminal
-web-ext run -t chromium # to auto-reload Chrome
-web-ext run # to auto-reload Firefox
+npm run watch # runs forever
+web-ext run -t chromium # to auto-reload a fresh Chrome
+web-ext run # to auto-reload a fresh Firefox
 ```
 
-Then browse to the `test.html` in the current directory.
-
-Then navigate 
+Then browse to the `test-wallet.html` in the current directory, configure your petnames, and open a new tab to `test-dapp.html`.
 
 # UPSTREAM: browser-extension-template
 
