@@ -8,11 +8,17 @@ const DEFAULT_PET_IMAGE =
 const UNKNOWN_PET_IMAGE =
   'https://upload.wikimedia.org/wikipedia/commons/d/d9/Icon-round-Question_mark.svg';
 
-const accessCheck = (walletUrls, myOrigin) => {
+const accessCheck = walletUrls => {
+  const href = window.location.href;
+  const origin = window.location.origin;
   for (const url of walletUrls) {
     try {
+      if (href === url) {
+        // Exact match.
+        return true;
+      }
       const allowedOrigin = new URL(url).origin;
-      if (allowedOrigin === myOrigin) {
+      if (allowedOrigin !== 'file://' && allowedOrigin === origin) {
         return true;
       }
     } catch (e) {
@@ -114,8 +120,7 @@ window.addEventListener('message', async ev => {
     }
     case 'AGORIC_POWERBOX_SET_PETDATA': {
       const { petdata = {}, walletUrls = [] } = await optionsStorage.getAll();
-      const myOrigin = new URL(window.location.href).origin;
-      if (accessCheck(walletUrls, myOrigin)) {
+      if (accessCheck(walletUrls)) {
         const { id, petdata: pet } = obj;
         petdata[id] = pet;
         await optionsStorage.set({ petdata: { ...petdata } });
@@ -129,7 +134,7 @@ window.addEventListener('message', async ev => {
 let lastIsPrivileged = null;
 const updatePetData = async () => {
   const { petdata = {}, walletUrls = [] } = await optionsStorage.getAll();
-  if (accessCheck(walletUrls, new URL(window.location.href).origin)) {
+  if (accessCheck(walletUrls)) {
     if (!lastIsPrivileged) {
       lastIsPrivileged = true;
       window.postMessage({
