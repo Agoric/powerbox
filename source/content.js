@@ -3,7 +3,7 @@ import browser from 'webextension-polyfill';
 import optionsStorage from './options-storage.js';
 
 const DEFAULT_PET_IMAGE = 'https://agoric.com/wp-content/themes/agoric_2021_theme/assets/android-icon-192x192.png';
-const UNKNOWN_PET_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/2/25/Icon-round-Question_mark.jpg';
+const UNKNOWN_PET_IMAGE = 'https://upload.wikimedia.org/wikipedia/commons/d/d9/Icon-round-Question_mark.svg';
 
 const accessCheck = (walletUrls, myOrigin) => {
   for (const url of walletUrls) {
