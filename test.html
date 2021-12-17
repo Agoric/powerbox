@@ -33,7 +33,7 @@
 <p>And my wallet is found at: <a id="wlt">Loading...</a></p>
 
 <p>This page is <span class="aWallet hidden">a wallet (petname editor enabled)</span>
-  <span class="notAWallet">not a wallet (petname editor disabled)</span></p>
+  <span class="notAWallet">not a wallet (petname editor disabled)</span>.</p>
 
 <table class="aWallet hidden">
   <tr id="ag1"><th>AG.1</th>
@@ -44,6 +44,11 @@
   <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
   </tr>
 </table>
+
+<p><span class="aWallet hidden">To mark this page as not a wallet, remove</span>
+  <span class="notAWallet">To mark this page as a wallet, add</span>
+  <code style="font-weight:bold" class="pageHref">???</code>
+in your Agoric Power Box Extension settings.</p>
 
 <script type="module">
 // The following doesn't work for file: URLs.
@@ -62,10 +67,13 @@ const debounce = (fn, delay) => {
   }, delay));
 };
 
+document.querySelector('.pageHref').textContent = window.location.href;
+
 window.addEventListener('message', ev => {
   const obj = ev.data;
   switch (obj.type) {
     case 'AGORIC_POWERBOX_READY': {
+      window.postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETNAMES' }, '*');
       window.postMessage({ type: 'AGORIC_POWERBOX_GET_URL' }, '*');
       break;
     }
