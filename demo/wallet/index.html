@@ -15,12 +15,12 @@
 }
 </style>
 
-<p><span class="aWallet hidden">To unmark this page as not a wallet, remove</span>
-  <span class="notAWallet">To mark this page as a wallet, add</span>
+<p><span class="aPowerbox hidden">To unmark this page as not a powerbox, remove</span>
+  <span class="notAPowerbox">To mark this page as a powerbox, add</span>
   <code style="font-weight:bold" class="pageHref">???</code>
 in your Agoric Power Box Extension settings.</p>
 
-<table class="aWallet hidden">
+<table class="aPowerbox hidden">
   <tr id="ag1"><th>AG.1</th>
   <td>
     <div data-agoric-target="img" data-agoric-id="AG.1">AG.1</div>
@@ -64,11 +64,11 @@ window.addEventListener('message', ev => {
     case 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED': {
       const { isPrivileged } = obj;
       if (isPrivileged) {
-        document.querySelectorAll('.aWallet').forEach(e => e.classList.remove('hidden'));
-        document.querySelectorAll('.notAWallet').forEach(e => e.classList.add('hidden'));
+        document.querySelectorAll('.aPowerbox').forEach(e => e.classList.remove('hidden'));
+        document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.add('hidden'));
       } else {
-        document.querySelectorAll('.aWallet').forEach(e => e.classList.add('hidden'));
-        document.querySelectorAll('.notAWallet').forEach(e => e.classList.remove('hidden'));
+        document.querySelectorAll('.aPowerbox').forEach(e => e.classList.add('hidden'));
+        document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.remove('hidden'));
       }
       break;
     }

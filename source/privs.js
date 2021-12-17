@@ -25,11 +25,11 @@ export const makeRefreshPrivileged = ({
 
 export const checkPrivileged = ({
   location = window.location,
-  walletUrls = [],
+  powerboxUrls = [],
 }) => {
   const href = location.href;
   const origin = location.origin;
-  for (const allowedUrl of walletUrls) {
+  for (const allowedUrl of powerboxUrls) {
     try {
       if (href === allowedUrl) {
         // Exact match.
@@ -42,7 +42,7 @@ export const checkPrivileged = ({
         return true;
       }
     } catch (e) {
-      console.error(`Invalid wallet URL: ${allowedUrl}`);
+      console.error(`Invalid powerbox URL: ${allowedUrl}`);
     }
   }
   return false;

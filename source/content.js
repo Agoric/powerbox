@@ -16,10 +16,10 @@ window.addEventListener('message', async ev => {
   const obj = ev.data;
   switch (obj.type) {
     case 'AGORIC_POWERBOX_EXPAND_PETNAMES': {
-      const { petdata = {}, walletUrls = [] } = await optionsStorage.getAll();
+      const { petdata = {}, powerboxUrls = [] } = await optionsStorage.getAll();
       const privileged = checkPrivileged({
         location: window.location,
-        walletUrls,
+        powerboxUrls,
       });
       refreshPetdata({ privileged, petdata }, true);
       refreshPrivileged({ privileged }, true);
@@ -31,17 +31,16 @@ window.addEventListener('message', async ev => {
       break;
     }
     case 'AGORIC_POWERBOX_SET_PETDATA': {
-      const { petdata = {}, walletUrls = [] } = await optionsStorage.getAll();
-      if (checkPrivileged({ location: window.location, walletUrls })) {
+      const { petdata = {}, powerboxUrls = [] } = await optionsStorage.getAll();
+      if (checkPrivileged({ location: window.location, powerboxUrls })) {
         const { id, petdata: rawPet } = obj;
         const pet = {};
         assertAgoricId(id);
         Object.entries(rawPet).forEach(([k, v]) => {
           assertAgoricId(k);
-          if (typeof v !== 'string' || !v) {
-            throw new Error(`Invalid petdata for ${k}: ${v}`);
+          if (typeof v === 'string' && v) {
+            pet[k] = v;
           }
-          pet[k] = v;
         });
         petdata[id] = pet;
         await optionsStorage.set({ petdata: { ...petdata } });
@@ -65,10 +64,13 @@ browser.storage.onChanged.addListener(async changes => {
   const {
     defaultUrl,
     petdata = {},
-    walletUrls = [],
+    powerboxUrls = [],
   } = await optionsStorage.getAll();
 
-  const privileged = checkPrivileged({ location: window.location, walletUrls });
+  const privileged = checkPrivileged({
+    location: window.location,
+    powerboxUrls,
+  });
   refreshPrivileged({ privileged });
   refreshPetdata({ privileged, petdata });
   refreshUrl({ defaultUrl });

@@ -1,5 +1,5 @@
 <style>
-[data-agoric-target="img"] {
+[data-agoric-target="img"], [data-agoric-target="img-if-known"] {
   display: inline-block;
   width: 32px;
   height: 32px
@@ -15,22 +15,23 @@
 }
 </style>
 
+<p>My wallet is found at: <a id="powerboxLink" target="powerbox">
+  <b>(Please enable the Agoric Power Box extension)</b></a></p>
+
 <p>This is a test of petnames:
-  <div data-agoric-target="img" data-agoric-id="AG.1">AG.1</div>
-  <span data-agoric-id="AG.1">AG.1</span>
+  <div data-agoric-target="img-if-known" data-agoric-id="AG.1">AG.1</div>
+  <span data-agoric-target="text-if-known" data-agoric-id="AG.1"></span>
 </p>
 
 <p>Another one:
   <div data-agoric-target="img" data-agoric-id="AG.2">AG.2</div>
-  <span data-agoric-id="AG.2">AG.2</span>
+  <span data-agoric-target="text" data-agoric-id="AG.2"></span>
 </p>
 
 <p>Unknown petname:
-  <div data-agoric-id="AG.n" data-agoric-target="img">AG.n</div>
-  <span data-agoric-id="AG.n">AG.n</span>
+  <div data-agoric-target="img" data-agoric-id="AG.n">AG.n</div>
+  <span data-agoric-target="text" data-agoric-id="AG.n"></span>
 </p>
-
-<p>And my wallet is found at: <a id="walletLink" target="wallet">Loading...</a></p>
 
 <script type="text/javascript">
 window.addEventListener('message', ev => {
@@ -42,7 +43,7 @@ window.addEventListener('message', ev => {
       break;
     }
     case 'AGORIC_POWERBOX_URL': {
-      const wlt = document.getElementById('walletLink');
+      const wlt = document.getElementById('powerboxLink');
       wlt.innerText = ev.data.url;
       wlt.href = ev.data.url;
       break;
