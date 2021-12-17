@@ -4,6 +4,9 @@ const DEFAULT_PET_IMAGE =
 const UNKNOWN_PET_IMAGE =
   'https://upload.wikimedia.org/wikipedia/commons/d/d9/Icon-round-Question_mark.svg';
 
+const DEFAULT_TEXT_STYLE_WIDTH = '8em';
+const DEFAULT_TEXT_STYLE_HEIGHT = '1.5em';
+
 export const assertAgoricId = id => {
   if (typeof id !== 'string' || !id.match(/^[a-z0-9]/i)) {
     throw new Error(`Invalid Agoric id ${id}`);
@@ -11,7 +14,11 @@ export const assertAgoricId = id => {
   return true;
 };
 
-export const makeExpandPetdata = ({ document = globalThis.document }) => {
+export const makeExpandPetdata = ({
+  document = globalThis.document,
+  textStyleWidth = DEFAULT_TEXT_STYLE_WIDTH,
+  textStyleHeight = DEFAULT_TEXT_STYLE_HEIGHT,
+}) => {
   /** @type {WeakMap<HTMLElement, { shadow: ShadowRoot, hidden?: HTMLElement }>} */
   const elementToData = new WeakMap();
 
@@ -29,20 +36,23 @@ export const makeExpandPetdata = ({ document = globalThis.document }) => {
         const { shadow, hidden } = elementToData.get(el);
 
         const { agoricTarget = 'text', agoricId = '???' } = el.dataset;
-        let { petname, petimage } = petdata[agoricId] || {};
-        if (!petimage && petname) {
+        const { petname: rawPetname, petimage: rawPetimage } =
+          petdata[agoricId] || {};
+        let petimage = rawPetimage;
+        if (!petimage && rawPetname) {
           petimage = DEFAULT_PET_IMAGE;
         }
-        if (!petimage) {
-          petimage = UNKNOWN_PET_IMAGE;
-        }
-        if (!petname) {
-          petname = `Unknown.${agoricId}`;
-        }
+        const petname = rawPetname || `Unknown.${agoricId}`;
 
         let n = hidden;
         switch (agoricTarget) {
+          case 'img-if-known':
           case 'img': {
+            if (agoricTarget === 'img-if-known' && !petimage) {
+              n = '';
+            } else if (!petimage) {
+              petimage = UNKNOWN_PET_IMAGE;
+            }
             if (petimage) {
               if (
                 !hidden ||
@@ -62,6 +72,7 @@ export const makeExpandPetdata = ({ document = globalThis.document }) => {
               if (petname) {
                 n.alt = petname;
               }
+              // Using 100% ensures our image size cannot be sniffed via box sizing.
               n.style.width = '100%';
               n.style.height = '100%';
               n.style.objectFit = 'contain';
@@ -69,15 +80,37 @@ export const makeExpandPetdata = ({ document = globalThis.document }) => {
             }
             // Fall through to text mode.
           }
+          case 'text-if-known':
           default: {
-            if (!hidden) {
-              n = petname;
-            } else if (petname !== hidden) {
-              n = petname;
+            if (agoricTarget === 'text-if-known' && !rawPetname) {
+              n = '';
+            } else if (
+              !hidden ||
+              !hidden.tagName ||
+              hidden.tagName.toLowerCase() !== 'span'
+            ) {
+              n = document.createElement('span');
+            } else if (
+              petname !== hidden.title ||
+              petname !== hidden.textContent
+            ) {
+              n = hidden;
             } else {
               // Nothing needs to change.
               return;
             }
+            n.title = petname;
+            n.textContent = petname;
+
+            // These properties ensure we always use the same (determined only
+            // by the host) size to prevent the untrusted dapp from sniffing
+            // text via box sizing.
+            n.style.display = 'inline-block';
+            n.style.whiteSpace = 'nowrap';
+            n.style.overflow = 'hidden';
+            n.style.textOverflow = 'ellipsis';
+            n.style.width = textStyleWidth;
+            n.style.height = textStyleHeight;
             break;
           }
         }
