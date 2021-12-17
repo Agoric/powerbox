@@ -30,7 +30,7 @@
   <span data-agoric-id="AG.n">AG.n</span>
 </p>
 
-<p>And my wallet is found at: <a id="wlt">Loading...</a></p>
+<p>And my wallet is found at: <a id="walletLink" target="wallet">Loading...</a></p>
 
 <script type="text/javascript">
 window.addEventListener('message', ev => {
@@ -42,7 +42,7 @@ window.addEventListener('message', ev => {
       break;
     }
     case 'AGORIC_POWERBOX_URL': {
-      const wlt = document.getElementById('wlt');
+      const wlt = document.getElementById('walletLink');
       wlt.innerText = ev.data.url;
       wlt.href = ev.data.url;
       break;

@@ -38,22 +38,8 @@ in your Agoric Power Box Extension settings.</p>
   </tr>
 </table>
 
-<script type="text/javascript">
-// The following doesn't work for file:// URLs.
-//   import debounce from './source/debounce.js';
-// So we inline it.
-const debounceMap = new Map();
-
-const debounce = (fn, delay) => {
-  const timeout = debounceMap.get(fn);
-  if (timeout) {
-    clearTimeout(timeout);
-  }
-  debounceMap.set(fn, setTimeout(() => {
-    debounceMap.delete(fn);
-    fn();
-  }, delay));
-};
+<script type="module">
+import debounce from '../../source/debounce.js';
 
 document.querySelector('.pageHref').textContent = window.location.href;
 

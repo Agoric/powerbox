@@ -10,7 +10,15 @@ web-ext run -t chromium # to auto-reload a fresh Chrome
 web-ext run # to auto-reload a fresh Firefox
 ```
 
-Then browse to the `test-wallet.html` in the current directory, configure your petnames, and open a new tab to `test-dapp.html`.
+## To test the wallet demo
+
+Open a tab to `test-dapp.html` in the current directory.
+
+```
+npm run demo # This listens on localhost:8000
+```
+
+Click on the "my wallet is found" link.
 
 # UPSTREAM: browser-extension-template
 
