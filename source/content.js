@@ -1,21 +1,32 @@
-/* global window, document */
+/* global window, document, MessageChannel */
 import browser from 'webextension-polyfill';
 
 import optionsStorage from './options-storage.js';
 
+import { makeConnect } from './connect.js';
 import { assertAgoricId, makeRefreshPetdata } from './petdata.js';
 import { checkPrivileged, makeRefreshPrivileged } from './privs.js';
-import { makeRefreshUrl } from './url.js';
 
-const send = o => window.postMessage(o);
-const refreshUrl = makeRefreshUrl({ send });
+const send = (o, ...opts) => {
+  console.log('content', o);
+  window.postMessage(o, '*', ...opts);
+};
 const refreshPetdata = makeRefreshPetdata({ send, document });
 const refreshPrivileged = makeRefreshPrivileged({ send });
+const connect = makeConnect({ document, window });
 
 window.addEventListener('message', async ev => {
   const obj = ev.data;
   switch (obj.type) {
-    case 'AGORIC_POWERBOX_EXPAND_PETNAMES': {
+    case 'AGORIC_POWERBOX_CONNECT': {
+      const { defaultUrl } = await optionsStorage.getAll();
+      const { port1, port2 } = new MessageChannel();
+      const url = new URL('/wallet-bridge.html', defaultUrl);
+      connect({ port: port1, url: url.href });
+      send({ type: 'AGORIC_POWERBOX_CONNECTING' }, [port2]);
+      break;
+    }
+    case 'AGORIC_POWERBOX_EXPAND_PETDATA': {
       const { petdata = {}, powerboxUrls = [] } = await optionsStorage.getAll();
       const privileged = checkPrivileged({
         location: window.location,
@@ -23,11 +34,6 @@ window.addEventListener('message', async ev => {
       });
       refreshPetdata({ privileged, petdata }, true);
       refreshPrivileged({ privileged }, true);
-      break;
-    }
-    case 'AGORIC_POWERBOX_GET_URL': {
-      const { defaultUrl } = await optionsStorage.getAll();
-      refreshUrl({ defaultUrl }, true);
       break;
     }
     case 'AGORIC_POWERBOX_SET_PETDATA': {
@@ -51,9 +57,6 @@ window.addEventListener('message', async ev => {
   }
 });
 
-// Initialize the petnames.
-send({ type: 'AGORIC_POWERBOX_READY' });
-
 browser.storage.onChanged.addListener(async changes => {
   const optionsChanged = !!changes[optionsStorage.storageName];
   if (!optionsChanged) {
@@ -61,11 +64,7 @@ browser.storage.onChanged.addListener(async changes => {
   }
 
   // Refresh any dependent data.
-  const {
-    defaultUrl,
-    petdata = {},
-    powerboxUrls = [],
-  } = await optionsStorage.getAll();
+  const { petdata = {}, powerboxUrls = [] } = await optionsStorage.getAll();
 
   const privileged = checkPrivileged({
     location: window.location,
@@ -73,5 +72,7 @@ browser.storage.onChanged.addListener(async changes => {
   });
   refreshPrivileged({ privileged });
   refreshPetdata({ privileged, petdata });
-  refreshUrl({ defaultUrl });
 });
+
+// Tell our caller we're ready.
+send({ type: 'AGORIC_POWERBOX_READY' });

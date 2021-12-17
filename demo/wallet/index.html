@@ -47,7 +47,7 @@ window.addEventListener('message', ev => {
   const obj = ev.data;
   switch (obj.type) {
     case 'AGORIC_POWERBOX_READY': {
-      window.postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETNAMES' }, '*');
+      window.postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETDATA' }, '*');
       break;
     }
     case 'AGORIC_POWERBOX_PETDATA': {
@@ -83,5 +83,9 @@ for (const id of ['1', '2']) {
   };
   petname.addEventListener('keyup', ev => debounce(save, 1000));
   petimage.addEventListener('keyup', ev => debounce(save, 1000));
+}
+
+if (window.parent !== window) {
+  window.parent.postMessage({ type: 'walletBridgeLoaded' }, '*');
 }
 </script>

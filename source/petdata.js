@@ -18,7 +18,7 @@ export const makeExpandPetdata = ({
   document = globalThis.document,
   textStyleWidth = DEFAULT_TEXT_STYLE_WIDTH,
   textStyleHeight = DEFAULT_TEXT_STYLE_HEIGHT,
-}) => {
+} = {}) => {
   /** @type {WeakMap<HTMLElement, { shadow: ShadowRoot, hidden?: HTMLElement }>} */
   const elementToData = new WeakMap();
 
@@ -130,7 +130,7 @@ export const makeRefreshPetdata = ({
   document = globalThis.document,
   expandPetdata = makeExpandPetdata({ document }),
   send = obj => window.postMessage(obj, '*'),
-}) => {
+} = {}) => {
   let isSubscribed = false;
   return ({ privileged = false, petdata = {} }, subscribe = false) => {
     if (subscribe) {

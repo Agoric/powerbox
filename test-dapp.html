@@ -15,10 +15,7 @@
 }
 </style>
 
-<p>My wallet is found at: <a id="powerboxLink" target="powerbox">
-  <b>(Please enable the Agoric Power Box extension)</b></a></p>
-
-<p>This is a test of petnames:
+<p>This is a test of petdata:
   <div data-agoric-target="img-if-known" data-agoric-id="AG.1">AG.1</div>
   <span data-agoric-target="text-if-known" data-agoric-id="AG.1"></span>
 </p>
@@ -38,8 +35,17 @@ window.addEventListener('message', ev => {
   const obj = ev.data;
   switch (obj.type) {
     case 'AGORIC_POWERBOX_READY': {
-      window.postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETNAMES' }, '*');
-      window.postMessage({ type: 'AGORIC_POWERBOX_GET_URL' }, '*');
+      window.postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETDATA' }, '*');
+      window.postMessage({ type: 'AGORIC_POWERBOX_CONNECT' }, '*');
+      break;
+    }
+    case 'AGORIC_POWERBOX_CONNECTING': {
+      const port = ev.ports[0];
+      port.addEventListener('message', e => {
+        console.log('port received', e.data);
+        port.postMessage(e.data);
+      });
+      port.start();
       break;
     }
     case 'AGORIC_POWERBOX_URL': {
