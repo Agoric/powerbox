@@ -1,6 +1,10 @@
 /* global document */
 import optionsStorage from './options-storage.js';
 import debounce from './debounce.js';
+import '@material/mwc-radio';
+import '@material/mwc-textfield';
+import '@material/mwc-button';
+import '@material/mwc-icon-button';
 
 const awu = document.querySelector('#agoric-powerbox-urls');
 const newUrl = document.querySelector('#new-powerbox-url');
@@ -10,27 +14,29 @@ let defaultUrl;
 
 const makeListItem = (url, isDefault) => {
   const li = document.createElement('li');
-  const input = document.createElement('input');
-  input.type = 'radio';
-  input.name = 'defaultPowerbox';
-  input.value = url;
-  if (isDefault) {
-    input.checked = true;
-  }
 
-  input.addEventListener('click', _e => {
+  const div = document.createElement('div');
+  const radio = document.createElement('mwc-radio');
+  radio.name = 'defaultPowerbox';
+  radio.value = url;
+  if (isDefault) {
+    radio.checked = true;
+  }
+  radio.addEventListener('click', _e => {
     defaultUrl = url;
     optionsStorage.set({ defaultUrl });
   });
-  li.append(input);
+  div.append(radio);
+
   const link = document.createElement('a');
   link.href = url;
   link.target = '_blank';
   link.textContent = url;
-  li.append(link);
+  div.append(link);
+  li.append(div);
 
-  const button = document.createElement('button');
-  button.textContent = 'X';
+  const button = document.createElement('mwc-icon-button');
+  button.icon = 'close';
   button.addEventListener('click', async e => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,6 +51,7 @@ const makeListItem = (url, isDefault) => {
     await optionsStorage.set({ powerboxUrls, defaultUrl });
   });
   li.append(button);
+
   return li;
 };
 
@@ -54,19 +61,29 @@ async function init() {
     awu.append(makeListItem(url, url === defaultUrl));
   }
 
+  const textfield = newUrl.querySelector('mwc-textfield');
   const save = () => optionsStorage.set({ powerboxUrls, defaultUrl });
 
-  newUrl.querySelector('input').addEventListener('keydown', async e => {
+  const addUrl = value => {
+    const li = makeListItem(value, false);
+    awu.prepend(li);
+
+    powerboxUrls = [value, ...powerboxUrls];
+    textfield.value = '';
+
+    debounce(save, 1000);
+  };
+
+  textfield.addEventListener('keydown', async e => {
     if (e.key === 'Enter' || e.keyCode === 13) {
       e.preventDefault();
-      const li = makeListItem(e.target.value, false);
-      awu.insertBefore(li, newUrl.nextSibling);
-
-      powerboxUrls = [e.target.value, ...powerboxUrls];
-      e.target.value = '';
-
-      debounce(save, 1000);
+      addUrl(e.target.value);
     }
+  });
+
+  newUrl.querySelector('mwc-button').addEventListener('click', async e => {
+    e.preventDefault();
+    addUrl(textfield.value);
   });
 }
 

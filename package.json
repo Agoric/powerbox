@@ -33,7 +33,13 @@
 		"extends": "stylelint-config-standard"
 	},
 	"dependencies": {
+		"@material/mwc-button": "^0.25.3",
+		"@material/mwc-formfield": "^0.25.3",
+		"@material/mwc-icon-button": "^0.25.3",
+		"@material/mwc-radio": "^0.25.3",
+		"@material/mwc-textfield": "^0.25.3",
 		"@parcel/transformer-webextension": "^2.0.1",
+		"@webcomponents/webcomponentsjs": "^2.6.0",
 		"patch-package": "^6.4.7",
 		"webext-options-sync": "^2.0.1",
 		"webextension-polyfill": "^0.8.0"

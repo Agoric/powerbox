@@ -1,6 +1,26 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Material+Icons&display=block");
+
 html {
   min-width: 550px;
   overflow-x: hidden; /* Required to hide horizontal scroll on Firefox */
+}
+
+body {
+  font-family: Roboto, sans-serif;
+  margin: 0 20px 20px;
+  color: rgb(0 0 0 / 87%);
+  font-size: 14px;
+}
+
+h3 {
+  margin-top: 0;
+  font-size: 16px;
+}
+
+h4 {
+  font-size: 14px;
+  margin-bottom: 8px;
 }
 
 /* For use with screen readers */
@@ -56,6 +76,53 @@ input[type="text"] {
 /* Firefox only */
 .only-firefox {
   display: none;
+}
+
+li {
+  align-items: center;
+  display: flex;
+  list-style: none;
+  justify-content: space-between;
+}
+
+li > div {
+  align-items: center;
+  display: flex;
+}
+
+li > mwc-icon-button {
+  color: rgb(95 99 104 / 87%);
+
+  --mdc-icon-button-size: 32px;
+  --mdc-icon-size: 20px;
+}
+
+a,
+a:visited,
+a:hover,
+a:active {
+  color: #1976d2;
+}
+
+ul {
+  padding-inline-start: 0;
+  margin-top: 0;
+}
+
+.new-powerbox-url > mwc-textfield {
+  height: 36px;
+  vertical-align: middle;
+
+  --mdc-theme-primary: #04aab8;
+}
+
+.new-powerbox-url > mwc-button {
+  --mdc-theme-primary: #bb2d40;
+  --mdc-theme-on-primary: white;
+}
+
+mwc-radio {
+  --mdc-theme-secondary: #bb2d40;
 }
 
 @-moz-document url-prefix("") {
