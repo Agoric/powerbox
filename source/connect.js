@@ -20,6 +20,11 @@ export const makeConnect = ({
     log = (...args) => console.log(...args),
     connectionTimeout = DEFAULT_CONNECTION_TIMEOUT,
   } = {}) => {
+    const disconnect = () => {
+      port.postMessage({ type: 'AGORIC_POWERBOX_DISCONNECT' });
+      port.close();
+    };
+
     const shadow = document.createElement('div');
     shadow.style.display = 'none';
     const shadowRoot = shadow.attachShadow({ mode: 'closed' });
@@ -32,14 +37,15 @@ export const makeConnect = ({
     shadowRoot.appendChild(iframe);
     document.body.appendChild(shadow);
 
-    let timedOut;
+    let openTimeout;
     const messageHandler = ev => {
       if (ev.source !== iframe.contentWindow) {
         return;
       }
-      if (timedOut) {
-        clearTimeout(timedOut);
-        timedOut = null;
+      if (openTimeout) {
+        clearTimeout(openTimeout);
+        openTimeout = null;
+        port.postMessage({ type: 'AGORIC_POWERBOX_CONNECTED' });
       }
       port.postMessage(ev.data);
     };
@@ -51,10 +57,11 @@ export const makeConnect = ({
       window.removeEventListener('message', messageHandler);
       port.postMessage({ type: 'AGORIC_POWERBOX_ERROR', error: `${err}` });
       document.body.removeChild(shadow);
-      port.close();
+      disconnect();
     };
 
-    timedOut = setTimeout(() => {
+    openTimeout = setTimeout(() => {
+      openTimeout = null;
       log('Connection timeout');
       errorHandler(new Error('Connection timeout'));
     }, connectionTimeout);
@@ -71,5 +78,7 @@ export const makeConnect = ({
       errorHandler(new Error(ev.error));
     });
     port.start();
+
+    return disconnect;
   };
 };
