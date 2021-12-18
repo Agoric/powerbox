@@ -1,3 +1,12 @@
+<script type="text/javascript">
+  // Wire up a dapp in three lines:
+  agoricPowerbox.expandPetdata();
+  const conn = agoricPowerbox.connect(o => {
+    console.log('dapp received', o);
+    // conn.disconnect();
+  });
+</script>
+
 <style>
 [data-agoric-target="img"], [data-agoric-target="img-if-known"] {
   display: inline-block;
@@ -29,31 +38,3 @@
   <div data-agoric-target="img" data-agoric-id="AG.n">AG.n</div>
   <span data-agoric-target="text" data-agoric-id="AG.n"></span>
 </p>
-
-<script type="text/javascript">
-window.addEventListener('message', ev => {
-  const obj = ev.data;
-  switch (obj.type) {
-    case 'AGORIC_POWERBOX_READY': {
-      window.postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETDATA' }, '*');
-      window.postMessage({ type: 'AGORIC_POWERBOX_CONNECT' }, '*');
-      break;
-    }
-    case 'AGORIC_POWERBOX_CONNECTING': {
-      const port = ev.ports[0];
-      port.addEventListener('message', e => {
-        console.log('port received', e.data);
-        port.postMessage(e.data);
-      });
-      port.start();
-      break;
-    }
-    case 'AGORIC_POWERBOX_URL': {
-      const wlt = document.getElementById('powerboxLink');
-      wlt.innerText = ev.data.url;
-      wlt.href = ev.data.url;
-      break;
-    }
-  }
-});
-</script>
