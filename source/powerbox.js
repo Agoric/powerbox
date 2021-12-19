@@ -9,7 +9,7 @@
  * @param {Window} window the browser window
  * @returns {void}
  */
-export const createAgoricPowerboxInBrowser = ({ window }) => {
+export const createPowerboxInBrowser = ({ window }) => {
   const { apply } = Reflect;
   const { postMessage } = window;
   const PromiseConstructor = Promise;
@@ -100,7 +100,7 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
   });
 
   let lastConnectId = 0;
-  const agoricPowerbox = freeze({
+  const powerbox = freeze({
     connect: dispatch => {
       lastConnectId += 1;
       const connectId = lastConnectId;
@@ -146,5 +146,5 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
     },
   });
 
-  return agoricPowerbox;
+  return powerbox;
 };
