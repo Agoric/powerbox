@@ -66,67 +66,73 @@ export const makeConnect = ({
       port.close();
     };
 
-    const shadow = document.createElement('div');
-    shadow.style.display = 'none';
-    const shadowRoot = shadow.attachShadow({ mode: 'closed' });
-
     const origin = new URL(url).origin;
 
-    // Make an iframe.
-    const iframe = document.createElement('iframe');
-    iframe.src = url;
-    shadowRoot.appendChild(iframe);
-    document.body.appendChild(shadow);
+    const iframeHandler = () => {
+      const bridgeUrl = new URL('/wallet-bridge.html', url);
 
-    const toClient = makeQueuedSender(obj => port.postMessage(obj));
-    const fromClient = makeForcedInitSender(
-      obj => iframe.contentWindow.postMessage(obj, origin),
-      { type: 'AGORIC_CLIENT_INIT', clientOrigin },
-    );
+      const shadow = document.createElement('div');
+      shadow.style.display = 'none';
+      const shadowRoot = shadow.attachShadow({ mode: 'closed' });
 
-    let openTimeout;
-    const messageHandler = ev => {
-      if (ev.source !== iframe.contentWindow) {
-        return;
-      }
-      if (openTimeout) {
-        clearTimeout(openTimeout);
+      // Make an iframe.
+      const iframe = document.createElement('iframe');
+      iframe.src = bridgeUrl;
+      shadowRoot.appendChild(iframe);
+      document.body.appendChild(shadow);
+
+      const toClient = makeQueuedSender(obj => port.postMessage(obj));
+      const fromClient = makeForcedInitSender(
+        obj => iframe.contentWindow.postMessage(obj, origin),
+        { type: 'AGORIC_CLIENT_INIT', clientOrigin },
+      );
+
+      let openTimeout;
+      const messageHandler = ev => {
+        if (ev.source !== iframe.contentWindow) {
+          return;
+        }
+        if (openTimeout) {
+          clearTimeout(openTimeout);
+          openTimeout = null;
+          fromClient.flush();
+          toClient.send({ type: 'AGORIC_POWERBOX_CONNECTED' });
+        }
+        toClient.send(ev.data);
+      };
+
+      window.addEventListener('message', messageHandler);
+
+      const errorHandler = err => {
+        log('Got error', err);
+        window.removeEventListener('message', messageHandler);
+        port.postMessage({ type: 'AGORIC_POWERBOX_ERROR', error: `${err}` });
+        document.body.removeChild(shadow);
+        disconnect();
+      };
+
+      openTimeout = setTimeout(() => {
         openTimeout = null;
-        fromClient.flush();
-        toClient.send({ type: 'AGORIC_POWERBOX_CONNECTED' });
-      }
-      toClient.send(ev.data);
+        log('Connection timeout');
+        errorHandler(new Error('Connection timeout'));
+      }, connectionTimeoutMs);
+
+      port.addEventListener('message', ev => {
+        toClient.flush();
+        try {
+          fromClient.send(ev.data);
+        } catch (err) {
+          errorHandler(err);
+        }
+      });
+
+      port.addEventListener('messageerror', ev => {
+        errorHandler(new Error(ev.error));
+      });
+      port.start();
     };
 
-    window.addEventListener('message', messageHandler);
-
-    const errorHandler = err => {
-      log('Got error', err);
-      window.removeEventListener('message', messageHandler);
-      port.postMessage({ type: 'AGORIC_POWERBOX_ERROR', error: `${err}` });
-      document.body.removeChild(shadow);
-      disconnect();
-    };
-
-    openTimeout = setTimeout(() => {
-      openTimeout = null;
-      log('Connection timeout');
-      errorHandler(new Error('Connection timeout'));
-    }, connectionTimeoutMs);
-
-    port.addEventListener('message', ev => {
-      toClient.flush();
-      try {
-        fromClient.send(ev.data);
-      } catch (err) {
-        errorHandler(err);
-      }
-    });
-
-    port.addEventListener('messageerror', ev => {
-      errorHandler(new Error(ev.error));
-    });
-    port.start();
+    iframeHandler();
 
     return disconnect;
   };
