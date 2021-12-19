@@ -7,7 +7,7 @@ import '@material/mwc-textfield';
 import '@material/mwc-button';
 import '@material/mwc-icon-button';
 
-const awu = document.querySelector('#agoric-powerbox-urls');
+const awu = document.querySelector('#powerbox-urls');
 const newUrl = document.querySelector('#new-powerbox-url');
 
 let powerboxUrls = [];

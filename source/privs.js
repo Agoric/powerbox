@@ -9,14 +9,14 @@ export const makeRefreshPrivileged = ({
       if (!lastIsPrivileged) {
         lastIsPrivileged = true;
         send({
-          type: 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED',
+          type: 'POWERBOX_PAGE_IS_PRIVILEGED',
           isPrivileged: true,
         });
       }
     } else if (lastIsPrivileged === null || lastIsPrivileged) {
       lastIsPrivileged = false;
       send({
-        type: 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED',
+        type: 'POWERBOX_PAGE_IS_PRIVILEGED',
         isPrivileged: false,
       });
     }

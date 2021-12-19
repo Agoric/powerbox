@@ -58,4 +58,4 @@ browser.storage.onChanged.addListener(async changes => {
 });
 
 // Tell our caller we're ready.
-send({ type: 'AGORIC_POWERBOX_READY' });
+send({ type: 'POWERBOX_READY' });
