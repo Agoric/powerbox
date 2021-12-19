@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import OptionsSync from 'webext-options-sync';
 
 export default new OptionsSync({

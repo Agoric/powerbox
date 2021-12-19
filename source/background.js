@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import browser from 'webextension-polyfill';
 
 console.log('background is running');

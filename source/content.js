@@ -1,4 +1,5 @@
 /* global window, document, MessageChannel */
+/* eslint-disable import/no-extraneous-dependencies */
 import browser from 'webextension-polyfill';
 
 import optionsStorage from './options-storage.js';

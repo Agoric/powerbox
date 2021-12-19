@@ -1,4 +1,5 @@
 /* global document */
+/* eslint-disable import/no-extraneous-dependencies */
 import optionsStorage from './options-storage.js';
 import debounce from './debounce.js';
 import '@material/mwc-radio';
@@ -65,6 +66,8 @@ async function init() {
   const save = () => optionsStorage.set({ powerboxUrls, defaultUrl });
 
   const addUrl = value => {
+    if (!value) return;
+
     const li = makeListItem(value, false);
     awu.prepend(li);
 
@@ -77,13 +80,13 @@ async function init() {
   textfield.addEventListener('keydown', async e => {
     if (e.key === 'Enter' || e.keyCode === 13) {
       e.preventDefault();
-      addUrl(e.target.value);
+      addUrl(e.target.value.trim());
     }
   });
 
   newUrl.querySelector('mwc-button').addEventListener('click', async e => {
     e.preventDefault();
-    addUrl(textfield.value);
+    addUrl(textfield.value.trim());
   });
 }
 
