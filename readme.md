@@ -18,8 +18,6 @@ Open a tab to `test-dapp.html` in the current directory.
 npm run demo # This listens on localhost:8000
 ```
 
-Click on the "my wallet is found at" link.
-
 # UPSTREAM: browser-extension-template
 
 [link-webext-polyfill]: https://github.com/mozilla/webextension-polyfill

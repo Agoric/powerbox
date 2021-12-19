@@ -27,7 +27,6 @@ export const checkPrivileged = ({
   location = window.location,
   powerboxUrls = [],
 } = {}) => {
-  console.log({ location, powerboxUrls });
   const href = location.href;
   const origin = location.origin;
   for (const allowedUrl of powerboxUrls) {
