@@ -1,5 +1,44 @@
 /* global globalThis */
-export const DEFAULT_CONNECTION_TIMEOUT = 5000;
+export const DEFAULT_CONNECTION_TIMEOUT_MS = 5000;
+
+const makeQueuedSender = rawSend => {
+  let sendQ = [];
+  return {
+    send: obj => {
+      if (sendQ) {
+        sendQ.push(obj);
+        return;
+      }
+      rawSend(obj);
+    },
+    flush: () => {
+      if (sendQ) {
+        sendQ.forEach(obj => rawSend(obj));
+        sendQ = null;
+      }
+    },
+  };
+};
+
+const makeForcedInitSender = (rawSend, initPacket) => {
+  let initSent = false;
+  const qs = makeQueuedSender(rawSend);
+  return {
+    ...qs,
+    send: obj => {
+      if (obj && obj.type === initPacket.type) {
+        // Ensure the init message is first and formatted correctly.
+        obj = initPacket;
+        initSent = true;
+      }
+      if (initSent) {
+        qs.send(obj);
+        return;
+      }
+      console.info(`${initPacket.type} not sent yet, dropping ${obj.type}`);
+    },
+  };
+};
 
 export const makeConnect = ({
   document = globalThis.document,
@@ -11,17 +50,19 @@ export const makeConnect = ({
    * @param {Object} opts
    * @param {MessagePort} opts.port
    * @param {string} opts.url
+   * @param {string} opts.clientOrigin
    * @param {(...args: any[]) => void} opts.log
-   * @param {number} opts.connectionTimeout
+   * @param {number} opts.connectionTimeoutMs
    */
   return ({
     port,
+    clientOrigin,
     url,
     log = (...args) => console.log(...args),
-    connectionTimeout = DEFAULT_CONNECTION_TIMEOUT,
+    connectionTimeoutMs = DEFAULT_CONNECTION_TIMEOUT_MS,
   } = {}) => {
     const disconnect = () => {
-      port.postMessage({ type: 'AGORIC_POWERBOX_DISCONNECT' });
+      port.postMessage({ type: 'AGORIC_POWERBOX_DISCONNECTED' });
       port.close();
     };
 
@@ -37,6 +78,12 @@ export const makeConnect = ({
     shadowRoot.appendChild(iframe);
     document.body.appendChild(shadow);
 
+    const toClient = makeQueuedSender(obj => port.postMessage(obj));
+    const fromClient = makeForcedInitSender(
+      obj => iframe.contentWindow.postMessage(obj, origin),
+      { type: 'AGORIC_CLIENT_INIT', clientOrigin },
+    );
+
     let openTimeout;
     const messageHandler = ev => {
       if (ev.source !== iframe.contentWindow) {
@@ -45,9 +92,10 @@ export const makeConnect = ({
       if (openTimeout) {
         clearTimeout(openTimeout);
         openTimeout = null;
-        port.postMessage({ type: 'AGORIC_POWERBOX_CONNECTED' });
+        fromClient.flush();
+        toClient.send({ type: 'AGORIC_POWERBOX_CONNECTED' });
       }
-      port.postMessage(ev.data);
+      toClient.send(ev.data);
     };
 
     window.addEventListener('message', messageHandler);
@@ -64,11 +112,12 @@ export const makeConnect = ({
       openTimeout = null;
       log('Connection timeout');
       errorHandler(new Error('Connection timeout'));
-    }, connectionTimeout);
+    }, connectionTimeoutMs);
 
     port.addEventListener('message', ev => {
+      toClient.flush();
       try {
-        iframe.contentWindow.postMessage(ev.data, origin);
+        fromClient.send(ev.data);
       } catch (err) {
         errorHandler(err);
       }

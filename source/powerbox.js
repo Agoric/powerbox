@@ -82,6 +82,7 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
             .catch(noop);
         });
         port.start();
+        port.postMessage({ type: 'AGORIC_CLIENT_INIT' });
         resolve(port);
         break;
       }
@@ -113,12 +114,12 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
       return freeze({
         send: freeze(async o => {
           const port = await portP;
-          port.postMessage(o, '*');
+          port.postMessage(o);
         }),
         disconnect: freeze(async () => {
           const port = await portP;
           port.postMessage({
-            type: 'AGORIC_POWERBOX_DISCONNECTED',
+            type: 'AGORIC_CLIENT_DISCONNECTED',
           });
           port.close();
         }),

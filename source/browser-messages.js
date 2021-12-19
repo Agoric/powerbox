@@ -18,10 +18,15 @@ export const makeBrowserMessageHandler = ({
         const { defaultUrl } = await getOptions();
         const { port1, port2 } = new MessageChannel();
         const url = new URL('/wallet-bridge.html', defaultUrl);
-        const disconnect = connect({ port: port1, url: url.href, connectId });
+        const disconnect = connect({
+          port: port1,
+          clientOrigin: location.origin,
+          url: url.href,
+          connectId,
+        });
         if (disconnect) {
           port2.addEventListener('message', ev => {
-            if (ev.data && ev.data.type === 'AGORIC_POWERBOX_DISCONNECTED') {
+            if (ev.data && ev.data.type === 'AGORIC_CLIENT_DISCONNECTED') {
               disconnect();
             }
           });
