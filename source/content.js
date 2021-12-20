@@ -7,7 +7,6 @@ import optionsStorage from './options-storage.js';
 import { makeConnect } from './connect.js';
 import { makeRefreshPetdata } from './petdata.js';
 import { checkPrivileged, makeRefreshPrivileged } from './privs.js';
-import { createPowerboxInBrowser } from './powerbox.js';
 import { makeInjectScript } from './inject.js';
 import { makeBrowserMessageHandler } from './browser-messages.js';
 
@@ -19,7 +18,7 @@ const connect = makeConnect({ document, window });
 
 // If the injection throws, refuse to listen to messages.
 try {
-  injectScript(`globalThis.powerbox = (${createPowerboxInBrowser})(window);`);
+  injectScript(browser.runtime.getURL('/install-powerbox.js'));
 } catch (e) {
   console.error('Failed to inject powerbox:', e);
   throw e;
