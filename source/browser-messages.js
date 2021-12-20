@@ -17,11 +17,10 @@ export const makeBrowserMessageHandler = ({
         const { connectId } = obj;
         const { defaultUrl } = await getOptions();
         const { port1, port2 } = new MessageChannel();
-        const url = new URL('/wallet-bridge.html', defaultUrl);
         const disconnect = connect({
           port: port1,
           clientOrigin: location.origin,
-          url: url.href,
+          url: defaultUrl,
           connectId,
         });
         if (disconnect) {
