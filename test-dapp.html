@@ -1,4 +1,13 @@
 <script type="text/javascript">
+  if (typeof powerbox === 'undefined') {
+    alert(`\
+Powerbox not found.
+
+Please install and activate the Agoric Powerbox extension.
+`);
+    throw new Error('powerbox not found');
+  }
+
   // Wire up a dapp in three lines:
   powerbox.expandPetdata();
   const conn = powerbox.connect(o => {
