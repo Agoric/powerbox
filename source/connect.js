@@ -75,8 +75,10 @@ export const makeConnect = ({
       shadow.style.display = 'none';
       const shadowRoot = shadow.attachShadow({ mode: 'closed' });
 
-      // Make an iframe.
+      // Make an iframe, ensuring it's not displayed so that its size doesn't
+      // leak any information.
       const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
       iframe.src = bridgeUrl;
       shadowRoot.appendChild(iframe);
       document.body.appendChild(shadow);
