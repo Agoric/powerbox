@@ -38,10 +38,15 @@ in your Powerbox Extension settings.</p>
   </tr>
 </table>
 
-<script type="module">
-import debounce from '../../source/debounce.js';
+<script type="text/javascript">
+if (typeof powerbox === 'undefined') {
+  alert(`\
+Powerbox not found.
 
-document.querySelector('.pageHref').textContent = window.location.href;
+Please install and activate the Agoric Powerbox extension.
+`);
+  throw new Error('powerbox not found');
+}
 
 window.addEventListener('message', ev => {
   const obj = ev.data;
@@ -74,6 +79,12 @@ window.addEventListener('message', ev => {
     }
   }
 });
+</script>
+
+<script type="module">
+import debounce from '../../source/debounce.js';
+
+document.querySelector('.pageHref').textContent = window.location.href;
 
 for (const id of ['1', '2']) {
   const petname = document.querySelector(`#ag${id} .petname`);
