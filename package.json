@@ -2,7 +2,7 @@
 	"private": true,
 	"scripts": {
 		"build": "parcel build source/manifest.json --no-content-hash --no-source-maps --dist-dir distribution --no-cache --detailed-report 0",
-		"demo": "parcel serve demo/wallet/index.html --port=8000 --dist-dir demo-dist",
+		"demo": "parcel serve demo/wallet/index.html demo/wallet-bridge.html --port=8000 --dist-dir demo-dist",
 		"lint": "run-p lint:*",
 		"lint-fix": "run-p 'lint:* -- --fix'",
 		"lint:css": "stylelint source/**/*.css",

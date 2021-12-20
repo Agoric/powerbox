@@ -95,8 +95,4 @@ for (const id of ['1', '2']) {
   petname.addEventListener('keyup', ev => debounce(save, 1000));
   petimage.addEventListener('keyup', ev => debounce(save, 1000));
 }
-
-if (window.parent !== window) {
-  window.parent.postMessage({ type: 'walletBridgeLoaded' }, '*');
-}
 </script>
