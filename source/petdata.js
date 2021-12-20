@@ -3,6 +3,8 @@ const DEFAULT_PET_IMAGE =
   'https://agoric.com/wp-content/themes/agoric_2021_theme/assets/android-icon-192x192.png';
 const UNKNOWN_PET_IMAGE =
   'https://upload.wikimedia.org/wikipedia/commons/d/d9/Icon-round-Question_mark.svg';
+const TRANSPARENT_PET_IMAGE =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 const DEFAULT_TEXT_STYLE_WIDTH = '8em';
 const DEFAULT_TEXT_STYLE_HEIGHT = '1.5em';
@@ -48,69 +50,83 @@ export const makeExpandPetdata = ({
         switch (powerboxTarget) {
           case 'img-if-known':
           case 'img': {
-            if (powerboxTarget === 'img-if-known' && !petimage) {
-              n = '';
-            } else if (!petimage) {
-              petimage = UNKNOWN_PET_IMAGE;
-            }
+            // Regardless of contents, we need to have the same style below.
+            let petimageToUse;
+            let petnameToUse = petname;
             if (petimage) {
-              if (
-                !hidden ||
-                !hidden.tagName ||
-                hidden.tagName.toLowerCase() !== 'img'
-              ) {
-                // Our existing tag is not an img.
-                n = document.createElement('img');
-              } else if (petimage !== hidden.src || petname !== hidden.alt) {
-                // Use the existing tag, and mutate it.
-                n = hidden;
-              } else {
-                // Nothing needs to change.
-                return;
-              }
-              n.src = petimage;
-              if (petname) {
-                n.alt = petname;
-              }
-              // Using 100% ensures our image size cannot be sniffed via box sizing.
-              n.style.width = '100%';
-              n.style.height = '100%';
-              n.style.objectFit = 'contain';
-              break;
+              petimageToUse = petimage;
+            } else if (powerboxTarget === 'img-if-known') {
+              petimageToUse = TRANSPARENT_PET_IMAGE;
+              petnameToUse = '';
+            } else {
+              petimageToUse = UNKNOWN_PET_IMAGE;
             }
-            // Fall through to text mode.
-          }
-          case 'text-if-known':
-          default: {
-            if (powerboxTarget === 'text-if-known' && !rawPetname) {
-              n = '';
+
+            if (
+              !hidden ||
+              !hidden.tagName ||
+              hidden.tagName.toLowerCase() !== 'img'
+            ) {
+              // Our existing tag is not an img.
+              n = document.createElement('img');
             } else if (
+              petimageToUse !== hidden.src ||
+              petname !== hidden.title
+            ) {
+              // Use the existing tag, and mutate it.
+              n = hidden;
+            } else {
+              // Nothing needs to change.
+              return;
+            }
+
+            // Using 100% ensures the contents of our image do not affect the
+            // size of our element (prevent powerbox client content sniffing).
+            n.style.width = '100%';
+            n.style.height = '100%';
+            n.style.objectFit = 'contain';
+            n.title = petnameToUse;
+            n.src = petimageToUse;
+            break;
+          }
+
+          case 'text-if-known':
+          case 'text':
+          default: {
+            let petnameToUse;
+            if (powerboxTarget === 'text-if-known' && !rawPetname) {
+              petnameToUse = '';
+            } else {
+              petnameToUse = petname;
+            }
+
+            if (
               !hidden ||
               !hidden.tagName ||
               hidden.tagName.toLowerCase() !== 'span'
             ) {
               n = document.createElement('span');
             } else if (
-              petname !== hidden.title ||
-              petname !== hidden.textContent
+              petnameToUse !== hidden.title ||
+              petnameToUse !== hidden.textContent
             ) {
               n = hidden;
             } else {
               // Nothing needs to change.
               return;
             }
-            n.title = petname;
-            n.textContent = petname;
 
-            // These properties ensure we always use the same (determined only
-            // by the host) size to prevent the untrusted dapp from sniffing
-            // text via box sizing.
+            // These properties ensure our size does not vary with the text
+            // contents we are displaying, preventing the powerbox client from
+            // sniffing the contents via font metrics manipulation.
             n.style.display = 'inline-block';
+            n.style.width = textStyleWidth;
+            n.style.height = textStyleHeight;
             n.style.whiteSpace = 'nowrap';
             n.style.overflow = 'hidden';
             n.style.textOverflow = 'ellipsis';
-            n.style.width = textStyleWidth;
-            n.style.height = textStyleHeight;
+            n.title = petnameToUse;
+            n.textContent = petnameToUse;
             break;
           }
         }
