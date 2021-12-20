@@ -1,4 +1,5 @@
 <script type="text/javascript">
+window.addEventListener('load', () => {
   if (typeof powerbox === 'undefined') {
     alert(`\
 Powerbox not found.
@@ -14,6 +15,7 @@ Please install and activate the Agoric Powerbox extension.
     console.log('dapp received', o);
     // conn.disconnect();
   });
+});
 </script>
 
 <style>

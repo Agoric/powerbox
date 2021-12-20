@@ -73,19 +73,21 @@ const renderAll = (petdata = {}) => {
 
 renderAll();
 
-if (typeof powerbox === 'undefined') {
-  throw new Error('powerbox not found');
-}
-
-powerbox.expandPetdata(renderAll);
-
-powerbox.isPrivileged().then(isPrivileged => {
-  if (isPrivileged) {
-    document.querySelectorAll('.aPowerbox').forEach(e => e.classList.remove('hidden'));
-    document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.add('hidden'));
-  } else {
-    document.querySelectorAll('.aPowerbox').forEach(e => e.classList.add('hidden'));
-    document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.remove('hidden'));
+window.addEventListener('load', () => {
+  if (typeof powerbox === 'undefined') {
+    throw new Error('powerbox not found');
   }
+
+  powerbox.expandPetdata(renderAll);
+
+  powerbox.isPrivileged().then(isPrivileged => {
+    if (isPrivileged) {
+      document.querySelectorAll('.aPowerbox').forEach(e => e.classList.remove('hidden'));
+      document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.add('hidden'));
+    } else {
+      document.querySelectorAll('.aPowerbox').forEach(e => e.classList.add('hidden'));
+      document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.remove('hidden'));
+    }
+  });
 });
 </script>
