@@ -7,7 +7,7 @@ import optionsStorage from './options-storage.js';
 import { makeConnect } from './connect.js';
 import { makeRefreshPetdata } from './petdata.js';
 import { checkPrivileged, makeRefreshPrivileged } from './privs.js';
-import { createAgoricPowerboxInBrowser } from './powerbox.js';
+import { createPowerboxInBrowser } from './powerbox.js';
 import { makeInjectScript } from './inject.js';
 import { makeBrowserMessageHandler } from './browser-messages.js';
 
@@ -19,11 +19,9 @@ const connect = makeConnect({ document, window });
 
 // If the injection throws, refuse to listen to messages.
 try {
-  injectScript(
-    `globalThis.agoricPowerbox = (${createAgoricPowerboxInBrowser})(window);`,
-  );
+  injectScript(`globalThis.powerbox = (${createPowerboxInBrowser})(window);`);
 } catch (e) {
-  console.error('Failed to inject agoricPowerbox:', e);
+  console.error('Failed to inject powerbox:', e);
   throw e;
 }
 
@@ -60,4 +58,4 @@ browser.storage.onChanged.addListener(async changes => {
 });
 
 // Tell our caller we're ready.
-send({ type: 'AGORIC_POWERBOX_READY' });
+send({ type: 'POWERBOX_READY' });

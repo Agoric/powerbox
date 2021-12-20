@@ -1,10 +1,10 @@
 <style>
-[data-agoric-target="img"] {
+[data-powerbox-target="img"] {
   display: inline-block;
   width: 32px;
   height: 32px
 }
-[data-agoric-id] {
+[data-powerbox-id] {
   font-size: 18px;
   font-weight: bold;
   color: #000;
@@ -18,20 +18,20 @@
 <p><span class="aPowerbox hidden">To unmark this page as not a powerbox, remove</span>
   <span class="notAPowerbox">To mark this page as a powerbox, add</span>
   <code style="font-weight:bold" class="pageHref">???</code>
-in your Agoric Power Box Extension settings.</p>
+in your Powerbox Extension settings.</p>
 
 <table class="aPowerbox hidden">
   <tr id="ag1"><th>AG.1</th>
   <td>
-    <div data-agoric-target="img" data-agoric-id="AG.1">AG.1</div>
-    <span data-agoric-id="AG.1">AG.1</span>
+    <div data-powerbox-target="img" data-powerbox-id="AG.1">AG.1</div>
+    <span data-powerbox-id="AG.1">AG.1</span>
   </td>
   <td><input class="petname" type="text" placeholder="Petname" /></td>
   <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
   <tr id="ag2"><th>AG.2</th>
   <td>
-    <div data-agoric-target="img" data-agoric-id="AG.2">AG.2</div>
-    <span data-agoric-id="AG.2">AG.2</span>
+    <div data-powerbox-target="img" data-powerbox-id="AG.2">AG.2</div>
+    <span data-powerbox-id="AG.2">AG.2</span>
   </td>
   <td><input class="petname" type="text" placeholder="Petname" /></td>
   <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
@@ -46,11 +46,11 @@ document.querySelector('.pageHref').textContent = window.location.href;
 window.addEventListener('message', ev => {
   const obj = ev.data;
   switch (obj.type) {
-    case 'AGORIC_POWERBOX_READY': {
-      window.postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETDATA' }, '*');
+    case 'POWERBOX_READY': {
+      window.postMessage({ type: 'POWERBOX_EXPAND_PETDATA' }, '*');
       break;
     }
-    case 'AGORIC_POWERBOX_PETDATA': {
+    case 'POWERBOX_PETDATA': {
       const { petdata } = obj;
       for (const id of [1, 2]) {
         const petname = document.querySelector(`#ag${id} .petname`);
@@ -61,7 +61,7 @@ window.addEventListener('message', ev => {
       }
       break;
     }
-    case 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED': {
+    case 'POWERBOX_PAGE_IS_PRIVILEGED': {
       const { isPrivileged } = obj;
       if (isPrivileged) {
         document.querySelectorAll('.aPowerbox').forEach(e => e.classList.remove('hidden'));
@@ -79,7 +79,7 @@ for (const id of ['1', '2']) {
   const petname = document.querySelector(`#ag${id} .petname`);
   const petimage = document.querySelector(`#ag${id} .petimage`)
   const save = () => {
-    window.postMessage({ type: 'AGORIC_POWERBOX_SET_PETDATA', id: `AG.${id}`, petdata: { petname: petname.value, petimage: petimage.value }}, '*');
+    window.postMessage({ type: 'POWERBOX_SET_PETDATA', id: `AG.${id}`, petdata: { petname: petname.value, petimage: petimage.value }}, '*');
   };
   petname.addEventListener('keyup', ev => debounce(save, 1000));
   petimage.addEventListener('keyup', ev => debounce(save, 1000));

@@ -62,7 +62,7 @@ export const makeConnect = ({
     connectionTimeoutMs = DEFAULT_CONNECTION_TIMEOUT_MS,
   } = {}) => {
     const disconnect = () => {
-      port.postMessage({ type: 'AGORIC_POWERBOX_DISCONNECTED' });
+      port.postMessage({ type: 'POWERBOX_DISCONNECTED' });
       port.close();
     };
 
@@ -84,7 +84,7 @@ export const makeConnect = ({
       const toClient = makeQueuedSender(obj => port.postMessage(obj));
       const fromClient = makeForcedInitSender(
         obj => iframe.contentWindow.postMessage(obj, origin),
-        { type: 'AGORIC_CLIENT_INIT', clientOrigin },
+        { type: 'POWERBOX_CLIENT_INIT', clientOrigin },
       );
 
       let openTimeout;
@@ -96,7 +96,7 @@ export const makeConnect = ({
           clearTimeout(openTimeout);
           openTimeout = null;
           fromClient.flush();
-          toClient.send({ type: 'AGORIC_POWERBOX_CONNECTED' });
+          toClient.send({ type: 'POWERBOX_CONNECTED' });
         }
         toClient.send(ev.data);
       };
@@ -106,7 +106,7 @@ export const makeConnect = ({
       const errorHandler = err => {
         log('Got error', err);
         window.removeEventListener('message', messageHandler);
-        port.postMessage({ type: 'AGORIC_POWERBOX_ERROR', error: `${err}` });
+        port.postMessage({ type: 'POWERBOX_ERROR', error: `${err}` });
         document.body.removeChild(shadow);
         disconnect();
       };

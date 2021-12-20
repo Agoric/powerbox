@@ -1,5 +1,5 @@
 /* global MessageChannel */
-import { assertAgoricId } from './petdata.js';
+import { assertPowerboxId } from './petdata.js';
 import { checkPrivileged } from './privs.js';
 
 export const makeBrowserMessageHandler = ({
@@ -13,7 +13,7 @@ export const makeBrowserMessageHandler = ({
 }) => {
   return async obj => {
     switch (obj.type) {
-      case 'AGORIC_POWERBOX_CONNECT': {
+      case 'POWERBOX_CONNECT': {
         const { connectId } = obj;
         const { defaultUrl } = await getOptions();
         const { port1, port2 } = new MessageChannel();
@@ -25,16 +25,16 @@ export const makeBrowserMessageHandler = ({
         });
         if (disconnect) {
           port2.addEventListener('message', ev => {
-            if (ev.data && ev.data.type === 'AGORIC_CLIENT_DISCONNECTED') {
+            if (ev.data && ev.data.type === 'POWERBOX_CLIENT_DISCONNECTED') {
               disconnect();
             }
           });
         }
 
-        send({ type: 'AGORIC_POWERBOX_CONNECTING', connectId }, [port2]);
+        send({ type: 'POWERBOX_CONNECTING', connectId }, [port2]);
         break;
       }
-      case 'AGORIC_POWERBOX_EXPAND_PETDATA': {
+      case 'POWERBOX_EXPAND_PETDATA': {
         const { petdata = {}, powerboxUrls = [] } = await getOptions();
         const privileged = checkPrivileged({
           location,
@@ -44,14 +44,14 @@ export const makeBrowserMessageHandler = ({
         refreshPrivileged({ privileged }, true);
         break;
       }
-      case 'AGORIC_POWERBOX_SET_PETDATA': {
+      case 'POWERBOX_SET_PETDATA': {
         const { petdata = {}, powerboxUrls = [] } = await getOptions();
         if (checkPrivileged({ location, powerboxUrls })) {
           const { id, petdata: rawPet } = obj;
           const pet = {};
-          assertAgoricId(id);
+          assertPowerboxId(id);
           Object.entries(rawPet).forEach(([k, v]) => {
-            assertAgoricId(k);
+            assertPowerboxId(k);
             if (typeof v === 'string' && v) {
               pet[k] = v;
             }

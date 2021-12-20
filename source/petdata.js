@@ -7,9 +7,9 @@ const UNKNOWN_PET_IMAGE =
 const DEFAULT_TEXT_STYLE_WIDTH = '8em';
 const DEFAULT_TEXT_STYLE_HEIGHT = '1.5em';
 
-export const assertAgoricId = id => {
+export const assertPowerboxId = id => {
   if (typeof id !== 'string' || !id.match(/^[a-z0-9]/i)) {
-    throw new Error(`Invalid Agoric id ${id}`);
+    throw new Error(`Invalid Powerbox id ${id}`);
   }
   return true;
 };
@@ -23,7 +23,7 @@ export const makeExpandPetdata = ({
   const elementToData = new WeakMap();
 
   return ({ petdata }) => {
-    const selector = '[data-agoric-id]';
+    const selector = '[data-powerbox-id]';
     /** @type {NodeListOf<HTMLElement>} */
     const els = document.querySelectorAll(selector);
     [...els].forEach(el => {
@@ -35,20 +35,20 @@ export const makeExpandPetdata = ({
         }
         const { shadow, hidden } = elementToData.get(el);
 
-        const { agoricTarget = 'text', agoricId = '???' } = el.dataset;
+        const { powerboxTarget = 'text', powerboxId = '???' } = el.dataset;
         const { petname: rawPetname, petimage: rawPetimage } =
-          petdata[agoricId] || {};
+          petdata[powerboxId] || {};
         let petimage = rawPetimage;
         if (!petimage && rawPetname) {
           petimage = DEFAULT_PET_IMAGE;
         }
-        const petname = rawPetname || `Unknown.${agoricId}`;
+        const petname = rawPetname || `Unknown.${powerboxId}`;
 
         let n = hidden;
-        switch (agoricTarget) {
+        switch (powerboxTarget) {
           case 'img-if-known':
           case 'img': {
-            if (agoricTarget === 'img-if-known' && !petimage) {
+            if (powerboxTarget === 'img-if-known' && !petimage) {
               n = '';
             } else if (!petimage) {
               petimage = UNKNOWN_PET_IMAGE;
@@ -82,7 +82,7 @@ export const makeExpandPetdata = ({
           }
           case 'text-if-known':
           default: {
-            if (agoricTarget === 'text-if-known' && !rawPetname) {
+            if (powerboxTarget === 'text-if-known' && !rawPetname) {
               n = '';
             } else if (
               !hidden ||
@@ -141,7 +141,7 @@ export const makeRefreshPetdata = ({
     }
     expandPetdata({ petdata });
     if (privileged) {
-      send({ type: 'AGORIC_POWERBOX_PETDATA', petdata });
+      send({ type: 'POWERBOX_PETDATA', petdata });
     }
   };
 };

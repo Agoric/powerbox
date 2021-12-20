@@ -1,5 +1,5 @@
 /**
- * Create a object that speaks to this Agoric Power Box Extension.
+ * Create a object that speaks to this Powerbox Extension.
  *
  * NOTE: You may be tempted to break up this function, but it is designed to be
  * evaluated as a string.  Therefore, it must not directly reach for any
@@ -9,7 +9,7 @@
  * @param {Window} window the browser window
  * @returns {void}
  */
-export const createAgoricPowerboxInBrowser = ({ window }) => {
+export const createPowerboxInBrowser = ({ window }) => {
   const { apply } = Reflect;
   const { postMessage } = window;
   const PromiseConstructor = Promise;
@@ -66,12 +66,12 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
     }
     const obj = ev.data;
     switch (obj.type) {
-      case 'AGORIC_POWERBOX_PAGE_IS_PRIVILEGED': {
+      case 'POWERBOX_PAGE_IS_PRIVILEGED': {
         const { isPrivileged } = obj;
         dispatchPrivileged({ isPrivileged });
         break;
       }
-      case 'AGORIC_POWERBOX_CONNECTING': {
+      case 'POWERBOX_CONNECTING': {
         const { connectId } = obj;
         const { resolve, dispatch } = connectIdToConnection.get(connectId);
         connectIdToConnection.delete(connectId);
@@ -82,16 +82,16 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
             .catch(noop);
         });
         port.start();
-        port.postMessage({ type: 'AGORIC_CLIENT_INIT' });
+        port.postMessage({ type: 'POWERBOX_CLIENT_INIT' });
         resolve(port);
         break;
       }
-      case 'AGORIC_POWERBOX_PETDATA': {
+      case 'POWERBOX_PETDATA': {
         const { petdata } = obj;
         dispatchPetdata({ petdata });
         break;
       }
-      case 'AGORIC_POWERBOX_READY': {
+      case 'POWERBOX_READY': {
         resolvePowerboxReady();
         break;
       }
@@ -100,7 +100,7 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
   });
 
   let lastConnectId = 0;
-  const agoricPowerbox = freeze({
+  const powerbox = freeze({
     connect: dispatch => {
       lastConnectId += 1;
       const connectId = lastConnectId;
@@ -109,7 +109,7 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
       });
       // Don't actually try to connect until the powerbox is ready.
       powerboxReadyP.then(() =>
-        postMessage({ type: 'AGORIC_POWERBOX_CONNECT', connectId }),
+        postMessage({ type: 'POWERBOX_CONNECT', connectId }),
       );
       return freeze({
         send: freeze(async o => {
@@ -119,7 +119,7 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
         disconnect: freeze(async () => {
           const port = await portP;
           port.postMessage({
-            type: 'AGORIC_CLIENT_DISCONNECTED',
+            type: 'POWERBOX_CLIENT_DISCONNECTED',
           });
           port.close();
         }),
@@ -127,13 +127,13 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
     },
     expandPetdata: onPetdata => {
       powerboxReadyP.then(() => {
-        postMessage({ type: 'AGORIC_POWERBOX_EXPAND_PETDATA' });
+        postMessage({ type: 'POWERBOX_EXPAND_PETDATA' });
         dispatchPetdata({ onPetdata });
       });
     },
     setPetdata: (id, petdata) => {
       powerboxReadyP.then(() => {
-        postMessage({ type: 'AGORIC_POWERBOX_SET_PETDATA', id, petdata });
+        postMessage({ type: 'POWERBOX_SET_PETDATA', id, petdata });
       });
     },
     isPrivileged: onPrivileged => {
@@ -146,5 +146,5 @@ export const createAgoricPowerboxInBrowser = ({ window }) => {
     },
   });
 
-  return agoricPowerbox;
+  return powerbox;
 };
