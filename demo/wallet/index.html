@@ -48,35 +48,23 @@ Please install and activate the Agoric Powerbox extension.
   throw new Error('powerbox not found');
 }
 
-window.addEventListener('message', ev => {
-  const obj = ev.data;
-  switch (obj.type) {
-    case 'POWERBOX_READY': {
-      window.postMessage({ type: 'POWERBOX_EXPAND_PETDATA' }, '*');
-      break;
-    }
-    case 'POWERBOX_PETDATA': {
-      const { petdata } = obj;
-      for (const id of [1, 2]) {
-        const petname = document.querySelector(`#ag${id} .petname`);
-        const petimage = document.querySelector(`#ag${id} .petimage`);
-        const { petname: name, petimage: image } = petdata[`AG.${id}`] || {};
-        petname.value = name || '';
-        petimage.value = image || '';
-      }
-      break;
-    }
-    case 'POWERBOX_PAGE_IS_PRIVILEGED': {
-      const { isPrivileged } = obj;
-      if (isPrivileged) {
-        document.querySelectorAll('.aPowerbox').forEach(e => e.classList.remove('hidden'));
-        document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.add('hidden'));
-      } else {
-        document.querySelectorAll('.aPowerbox').forEach(e => e.classList.add('hidden'));
-        document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.remove('hidden'));
-      }
-      break;
-    }
+powerbox.expandPetdata(petdata => {
+  for (const id of [1, 2]) {
+    const petname = document.querySelector(`#ag${id} .petname`);
+    const petimage = document.querySelector(`#ag${id} .petimage`);
+    const { petname: name, petimage: image } = petdata[`AG.${id}`] || {};
+    petname.value = name || '';
+    petimage.value = image || '';
+  }
+});
+
+powerbox.isPrivileged().then(isPrivileged => {
+  if (isPrivileged) {
+    document.querySelectorAll('.aPowerbox').forEach(e => e.classList.remove('hidden'));
+    document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.add('hidden'));
+  } else {
+    document.querySelectorAll('.aPowerbox').forEach(e => e.classList.add('hidden'));
+    document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.remove('hidden'));
   }
 });
 </script>
