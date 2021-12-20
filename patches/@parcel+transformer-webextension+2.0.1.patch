@@ -1,5 +1,5 @@
 diff --git a/node_modules/@parcel/transformer-webextension/lib/WebExtensionTransformer.js b/node_modules/@parcel/transformer-webextension/lib/WebExtensionTransformer.js
-index fbc18aa..7b5e611 100644
+index fbc18aa..cddefd0 100644
 --- a/node_modules/@parcel/transformer-webextension/lib/WebExtensionTransformer.js
 +++ b/node_modules/@parcel/transformer-webextension/lib/WebExtensionTransformer.js
 @@ -73,7 +73,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
@@ -11,7 +11,42 @@ index fbc18aa..7b5e611 100644
  
  async function collectDependencies(asset, program, ptrs, hot) {
    var _program$browser_acti;
-@@ -250,6 +250,10 @@ async function collectDependencies(asset, program, ptrs, hot) {
+@@ -194,16 +194,31 @@ async function collectDependencies(asset, program, ptrs, hot) {
+   if (program.web_accessible_resources) {
+     let war = [];
+ 
+-    for (let i = 0; i < program.web_accessible_resources.length; ++i) {
++    let i = 0;
++    for (const resource of program.web_accessible_resources) {
+       // TODO: this doesn't support Parcel resolution
+-      const globFiles = (await (0, _utils().glob)(_path().default.join(_path().default.dirname(filePath), program.web_accessible_resources[i]), fs, {})).map(fp => asset.addURLDependency(_path().default.relative(_path().default.dirname(filePath), fp), {
++      const reses = typeof resource === 'string' ? [resource] : resource.resources;
++      for (const res of reses) {
++
++      const globFiles = (await (0, _utils().glob)(_path().default.join(_path().default.dirname(filePath), res), fs, {})).map(fp => asset.addURLDependency(_path().default.relative(_path().default.dirname(filePath), fp), {
+         needsStableName: true,
+         loc: {
+           filePath,
+           ...(0, _diagnostic().getJSONSourceLocation)(ptrs[`/web_accessible_resources/${i}`])
+         }
+       }));
+-      war = war.concat(globFiles);
++
++      if (typeof resource === 'string') {
++        war = war.concat(globFiles);
++      } else {
++        war.push({
++          ...resource,
++          resources: globFiles
++        });
++      }
++      i += 1;
++    }
++
+     }
+ 
+     program.web_accessible_resources = war;
+@@ -250,6 +265,10 @@ async function collectDependencies(asset, program, ptrs, hot) {
        program.background.scripts = [];
      }
  
@@ -23,7 +58,7 @@ index fbc18aa..7b5e611 100644
        resolveFrom: __filename
      }));
 diff --git a/node_modules/@parcel/transformer-webextension/lib/schema.js b/node_modules/@parcel/transformer-webextension/lib/schema.js
-index 56b3c0e..9ffcb9d 100644
+index 56b3c0e..4a7bd7b 100644
 --- a/node_modules/@parcel/transformer-webextension/lib/schema.js
 +++ b/node_modules/@parcel/transformer-webextension/lib/schema.js
 @@ -50,7 +50,7 @@ var _default = {
@@ -45,8 +80,29 @@ index 56b3c0e..9ffcb9d 100644
          }
        }
      },
+@@ -602,7 +605,18 @@ var _default = {
+     version_name: {
+       type: 'string'
+     },
+-    web_accessible_resources: arrStr
++    web_accessible_resources: {
++      oneOf: [arrStr, {
++        type: 'array',
++        items: {
++          type: 'object',
++          properties: {
++            resources: arrStr,
++            matches: arrStr,
++          }
++        }
++      }]
++    }
+   }
+ };
+ exports.default = _default;
+\ No newline at end of file
 diff --git a/node_modules/@parcel/transformer-webextension/src/WebExtensionTransformer.js b/node_modules/@parcel/transformer-webextension/src/WebExtensionTransformer.js
-index c409b21..b43f2ff 100644
+index c409b21..aae7125 100644
 --- a/node_modules/@parcel/transformer-webextension/src/WebExtensionTransformer.js
 +++ b/node_modules/@parcel/transformer-webextension/src/WebExtensionTransformer.js
 @@ -20,6 +20,7 @@ const DEP_LOCS = [
@@ -57,8 +113,71 @@ index c409b21..b43f2ff 100644
    ['chrome_url_overrides'],
    ['devtools_page'],
    ['options_ui', 'page'],
+@@ -172,27 +173,41 @@ async function collectDependencies(
+   }
+   if (program.web_accessible_resources) {
+     let war = [];
+-    for (let i = 0; i < program.web_accessible_resources.length; ++i) {
+-      // TODO: this doesn't support Parcel resolution
+-      const globFiles = (
+-        await glob(
+-          path.join(
+-            path.dirname(filePath),
+-            program.web_accessible_resources[i],
+-          ),
+-          fs,
+-          {},
+-        )
+-      ).map(fp =>
+-        asset.addURLDependency(path.relative(path.dirname(filePath), fp), {
+-          needsStableName: true,
+-          loc: {
+-            filePath,
+-            ...getJSONSourceLocation(ptrs[`/web_accessible_resources/${i}`]),
+-          },
+-        }),
+-      );
+-      war = war.concat(globFiles);
++    let i = 0;
++    for (const resource of program.web_accessible_resources) {
++      const reses = typeof resource === 'string' ? [resource] : resource.resources;
++      for (const res of reses) {
++        // TODO: this doesn't support Parcel resolution
++        const globFiles = (
++          await glob(
++            path.join(
++              path.dirname(filePath),
++              res,
++            ),
++            fs,
++            {},
++          )
++        ).map(fp =>
++          asset.addURLDependency(path.relative(path.dirname(filePath), fp), {
++            needsStableName: true,
++            loc: {
++              filePath,
++              ...getJSONSourceLocation(ptrs[`/web_accessible_resources/${i}`]),
++            },
++          }),
++        );
++        war = war.concat(globFiles);
++
++        if (typeof resource === 'string') {
++          war = war.concat(globFiles);
++        } else {
++          war.push({
++            ...resource,
++            resources: globFiles
++          });
++        }
++        i += 1;
++      }
+     }
+     program.web_accessible_resources = war;
+   }
 diff --git a/node_modules/@parcel/transformer-webextension/src/schema.js b/node_modules/@parcel/transformer-webextension/src/schema.js
-index 4d829ba..2c22969 100644
+index 4d829ba..08c0b9e 100644
 --- a/node_modules/@parcel/transformer-webextension/src/schema.js
 +++ b/node_modules/@parcel/transformer-webextension/src/schema.js
 @@ -43,7 +43,7 @@ export default ({
@@ -78,3 +197,22 @@ index 4d829ba..2c22969 100644
          persistent: {type: 'boolean'},
        },
      },
+@@ -387,6 +388,17 @@ export default ({
+       },
+     },
+     version_name: {type: 'string'},
+-    web_accessible_resources: arrStr,
++    web_accessible_resources: {
++      oneOf: [arrStr, {
++        type: 'array',
++        items: {
++          type: 'object',
++          properties: {
++            resources: arrStr,
++            matches: arrStr,
++          },
++        },
++      }],
++    },
+   },
+ }: SchemaEntity);
