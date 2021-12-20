@@ -43,8 +43,23 @@ jobs:
       - uses: actions/checkout@v2
       - name: install
         run: npm ci || npm install
+      - name: select ${{ matrix.command }} manifest version
+        run: |
+          case ${{ matrix.command }} in
+            # TODO: enable manifest v3 when necessary
+            # chrome)
+            #   npm clean:v3
+            #   ;;
+            firefox | chrome)
+              npm clean:v2
+              ;;
+            *)
+              echo "Unknown command: ${{ matrix.command }}"
+              exit 1
+              ;;
+          esac
       - run: npm run build --if-present
-      - name: Update extension’s meta
+      - name: Update extension's meta
         run: >-
           npx dot-json@1 $DIRECTORY/manifest.json version ${{
           needs.Version.outputs.version }}

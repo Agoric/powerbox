@@ -1,13 +1,18 @@
 name: Test
 
 on:
-  - pull_request
-  - push
+  pull_request:
+  push:
+    branches: [ main ] # $default-branch
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        manifest: ['v2', 'v3']
     steps:
       - uses: actions/checkout@v2
       - run: npm install
+      - run: npm run clean:${{ matrix.manifest }}
       - run: npm test

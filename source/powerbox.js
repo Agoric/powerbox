@@ -9,7 +9,7 @@
  * @param {Window} window the browser window
  * @returns {void}
  */
-export const createPowerboxInBrowser = ({ window }) => {
+export const makePowerboxKit = ({ window }) => {
   const { apply } = Reflect;
   const { postMessage } = window;
   const PromiseConstructor = Promise;
@@ -146,5 +146,5 @@ export const createPowerboxInBrowser = ({ window }) => {
     },
   });
 
-  return powerbox;
+  return { powerbox, init: () => postMessage({ type: 'POWERBOX_INIT' }) };
 };

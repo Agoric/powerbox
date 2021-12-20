@@ -3,3 +3,5 @@ distribution
 .parcel-cache
 .DS_Store
 demo-dist
+source/manifest.json
+web-ext-artifacts

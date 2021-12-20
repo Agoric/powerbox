@@ -13,6 +13,11 @@ export const makeBrowserMessageHandler = ({
 }) => {
   return async obj => {
     switch (obj.type) {
+      case 'POWERBOX_INIT': {
+        // Tell our caller we're ready.
+        send({ type: 'POWERBOX_READY' });
+        break;
+      }
       case 'POWERBOX_CONNECT': {
         const { connectId } = obj;
         const { defaultUrl } = await getOptions();

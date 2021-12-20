@@ -1,8 +1,13 @@
 {
 	"private": true,
 	"scripts": {
-		"build": "parcel build source/manifest.json --no-content-hash --no-source-maps --dist-dir distribution --no-cache --detailed-report 0",
-		"demo": "parcel serve demo/wallet/index.html demo/wallet-bridge.html --port=8000 --dist-dir demo-dist",
+    "clean:v2": "rm -rf distribution && cp source/manifest-v2.json source/manifest.json",
+    "clean:v3": "rm -rf distribution && cp source/manifest-v3.json source/manifest.json",
+    "build": "parcel build source/manifest.json --no-content-hash --no-source-maps --dist-dir distribution --no-cache --detailed-report 0",
+    "demo": "run-p demo:*",
+    "demo:priv": "npm run serve -- --dist-dir demo-dist/8000 --port=8000",
+    "demo:unpriv": "npm run serve -- --dist-dir demo-dist/5005 --port=5005",
+    "serve": "parcel serve demo/wallet/index.html demo/client.html demo/wallet-bridge.html",
 		"lint": "run-p lint:*",
 		"lint-fix": "run-p 'lint:* -- --fix'",
 		"lint:css": "stylelint source/**/*.css",
