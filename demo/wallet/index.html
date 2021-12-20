@@ -20,43 +20,64 @@
   <code style="font-weight:bold" class="pageHref">???</code>
 in your Powerbox Extension settings.</p>
 
-<table class="aPowerbox hidden">
-  <tr id="ag1"><th>AG.1</th>
-  <td>
-    <div data-powerbox-target="img" data-powerbox-id="AG.1">AG.1</div>
-    <span data-powerbox-id="AG.1">AG.1</span>
-  </td>
-  <td><input class="petname" type="text" placeholder="Petname" /></td>
-  <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
-  <tr id="ag2"><th>AG.2</th>
-  <td>
-    <div data-powerbox-target="img" data-powerbox-id="AG.2">AG.2</div>
-    <span data-powerbox-id="AG.2">AG.2</span>
-  </td>
-  <td><input class="petname" type="text" placeholder="Petname" /></td>
-  <td><input class="petimage" type="text" placeholder="Image URL" /></td></tr>
-  </tr>
+<table id="editor" class="aPowerbox hidden">
 </table>
 
-<script type="text/javascript">
-if (typeof powerbox === 'undefined') {
-  alert(`\
-Powerbox not found.
+<script type="module">
+import debounce from '../../source/debounce.js';
+  
+document.querySelector('.pageHref').textContent = window.location.href;
 
-Please install and activate the Agoric Powerbox extension.
-`);
+const petdataEditor = document.getElementById('editor');
+const renderPetdata = (id, petdata) => {
+  const rowId = `petdata-${id.replace(/\./g, '-')}`;
+  let row = document.getElementById(rowId);
+  const already = !!row;
+  if (!row) {
+    row = document.createElement('tr');
+    row.id = rowId;
+    row.innerHTML = `<th>${id}</th>
+      <td nowrap>
+        <div data-powerbox-target="img" data-powerbox-id="${id}">${id}</div>
+        <span data-powerbox-id="${id}">${id}</span>
+      </td>
+      <td><input class="petname" type="text" placeholder="Petname" /></td>
+      <td><input class="petimage" type="text" placeholder="Image URL" /></td>`;
+    petdataEditor.appendChild(row);
+  }
+  const petname = row.querySelector(`.petname`);
+  const petimage = row.querySelector(`.petimage`);
+
+  if (!already) {
+    const save = () => {
+      // window.postMessage({ type: 'POWERBOX_SET_PETDATA', id: `AG.${id}`, petdata: { petname: petname.value, petimage: petimage.value }}, '*');
+      powerbox.setPetdata(id, { petname: petname.value, petimage: petimage.value });
+    };
+    petname.addEventListener('keyup', ev => debounce(save));
+    petimage.addEventListener('keyup', ev => debounce(save));
+  }
+
+  const { petname: name, petimage: image } = petdata || {};
+  petname.value = name || '';
+  petimage.value = image || '';
+};
+
+const renderAll = (petdata = {}) => {
+  const toRender = new Set(Object.keys(petdata));
+  toRender.add('AG.1');
+  toRender.add('AG.2');
+  for (const id of [...toRender.keys()].sort()) {
+    renderPetdata(id, petdata[id]);
+  }
+};
+
+renderAll();
+
+if (typeof powerbox === 'undefined') {
   throw new Error('powerbox not found');
 }
 
-powerbox.expandPetdata(petdata => {
-  for (const id of [1, 2]) {
-    const petname = document.querySelector(`#ag${id} .petname`);
-    const petimage = document.querySelector(`#ag${id} .petimage`);
-    const { petname: name, petimage: image } = petdata[`AG.${id}`] || {};
-    petname.value = name || '';
-    petimage.value = image || '';
-  }
-});
+powerbox.expandPetdata(renderAll);
 
 powerbox.isPrivileged().then(isPrivileged => {
   if (isPrivileged) {
@@ -67,20 +88,4 @@ powerbox.isPrivileged().then(isPrivileged => {
     document.querySelectorAll('.notAPowerbox').forEach(e => e.classList.remove('hidden'));
   }
 });
-</script>
-
-<script type="module">
-import debounce from '../../source/debounce.js';
-
-document.querySelector('.pageHref').textContent = window.location.href;
-
-for (const id of ['1', '2']) {
-  const petname = document.querySelector(`#ag${id} .petname`);
-  const petimage = document.querySelector(`#ag${id} .petimage`)
-  const save = () => {
-    window.postMessage({ type: 'POWERBOX_SET_PETDATA', id: `AG.${id}`, petdata: { petname: petname.value, petimage: petimage.value }}, '*');
-  };
-  petname.addEventListener('keyup', ev => debounce(save, 1000));
-  petimage.addEventListener('keyup', ev => debounce(save, 1000));
-}
 </script>
